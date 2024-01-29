@@ -1,0 +1,2423 @@
+{
+    "source": {
+      "hash": "0x2ba5b026d2c18195b08f29dafa7023a2636971aa92541628b8242e92102e25d8",
+      "language": "ink! 4.3.0",
+      "compiler": "rustc 1.77.0-nightly",
+      "build_info": {
+        "build_mode": "Debug",
+        "cargo_contract_version": "3.2.0",
+        "rust_toolchain": "nightly-aarch64-apple-darwin",
+        "wasm_opt_settings": {
+          "keep_debug_symbols": false,
+          "optimization_passes": "Z"
+        }
+      }
+    },
+    "contract": {
+      "name": "asset_forwarder",
+      "version": "0.1.0",
+      "authors": [
+        "Priyanshu Mishra <priyanshu@routerprotocol.com>"
+      ],
+      "description": "Asset Forwarder implementation for the substrate based chains",
+      "repository": "https://github.com/router-protocol/asset-forwarder-contracts.git"
+    },
+    "spec": {
+      "constructors": [
+        {
+          "args": [
+            {
+              "label": "chain_id",
+              "type": {
+                "displayName": [
+                  "InkString"
+                ],
+                "type": 0
+              }
+            },
+            {
+              "label": "router_middleware_base",
+              "type": {
+                "displayName": [
+                  "InkString"
+                ],
+                "type": 0
+              }
+            },
+            {
+              "label": "gateway",
+              "type": {
+                "displayName": [
+                  "AccountId"
+                ],
+                "type": 2
+              }
+            }
+          ],
+          "default": false,
+          "docs": [
+            "Constructor that initializes the `Gateway Upgradeable Contract`."
+          ],
+          "label": "new",
+          "payable": false,
+          "returnType": {
+            "displayName": [
+              "ink_primitives",
+              "ConstructorResult"
+            ],
+            "type": 8
+          },
+          "selector": "0x9bae9d5e"
+        }
+      ],
+      "docs": [],
+      "environment": {
+        "accountId": {
+          "displayName": [
+            "AccountId"
+          ],
+          "type": 2
+        },
+        "balance": {
+          "displayName": [
+            "Balance"
+          ],
+          "type": 4
+        },
+        "blockNumber": {
+          "displayName": [
+            "BlockNumber"
+          ],
+          "type": 30
+        },
+        "chainExtension": {
+          "displayName": [
+            "ChainExtension"
+          ],
+          "type": 31
+        },
+        "hash": {
+          "displayName": [
+            "Hash"
+          ],
+          "type": 28
+        },
+        "maxEventTopics": 4,
+        "timestamp": {
+          "displayName": [
+            "Timestamp"
+          ],
+          "type": 29
+        }
+      },
+      "events": [
+        {
+          "args": [
+            {
+              "docs": [],
+              "indexed": true,
+              "label": "partner_id",
+              "type": {
+                "displayName": [
+                  "u128"
+                ],
+                "type": 4
+              }
+            },
+            {
+              "docs": [],
+              "indexed": false,
+              "label": "amount",
+              "type": {
+                "displayName": [
+                  "u128"
+                ],
+                "type": 4
+              }
+            },
+            {
+              "docs": [],
+              "indexed": true,
+              "label": "dest_chain_id_bytes",
+              "type": {
+                "displayName": [
+                  "Bytes32"
+                ],
+                "type": 3
+              }
+            },
+            {
+              "docs": [],
+              "indexed": false,
+              "label": "dest_amount",
+              "type": {
+                "displayName": [
+                  "u128"
+                ],
+                "type": 4
+              }
+            },
+            {
+              "docs": [],
+              "indexed": true,
+              "label": "deposit_id",
+              "type": {
+                "displayName": [
+                  "u128"
+                ],
+                "type": 4
+              }
+            },
+            {
+              "docs": [],
+              "indexed": true,
+              "label": "src_token",
+              "type": {
+                "displayName": [
+                  "AccountId"
+                ],
+                "type": 2
+              }
+            },
+            {
+              "docs": [],
+              "indexed": false,
+              "label": "recipient",
+              "type": {
+                "displayName": [
+                  "Bytes"
+                ],
+                "type": 7
+              }
+            },
+            {
+              "docs": [],
+              "indexed": false,
+              "label": "depositor",
+              "type": {
+                "displayName": [
+                  "AccountId"
+                ],
+                "type": 2
+              }
+            },
+            {
+              "docs": [],
+              "indexed": false,
+              "label": "dest_token",
+              "type": {
+                "displayName": [
+                  "Bytes"
+                ],
+                "type": 7
+              }
+            }
+          ],
+          "docs": [],
+          "label": "FundsDeposited"
+        },
+        {
+          "args": [
+            {
+              "docs": [],
+              "indexed": true,
+              "label": "partner_id",
+              "type": {
+                "displayName": [
+                  "u128"
+                ],
+                "type": 4
+              }
+            },
+            {
+              "docs": [],
+              "indexed": false,
+              "label": "amount",
+              "type": {
+                "displayName": [
+                  "u128"
+                ],
+                "type": 4
+              }
+            },
+            {
+              "docs": [],
+              "indexed": true,
+              "label": "dest_chain_id_bytes",
+              "type": {
+                "displayName": [
+                  "Bytes32"
+                ],
+                "type": 3
+              }
+            },
+            {
+              "docs": [],
+              "indexed": false,
+              "label": "dest_amount",
+              "type": {
+                "displayName": [
+                  "u128"
+                ],
+                "type": 4
+              }
+            },
+            {
+              "docs": [],
+              "indexed": true,
+              "label": "deposit_id",
+              "type": {
+                "displayName": [
+                  "u128"
+                ],
+                "type": 4
+              }
+            },
+            {
+              "docs": [],
+              "indexed": true,
+              "label": "src_token",
+              "type": {
+                "displayName": [
+                  "AccountId"
+                ],
+                "type": 2
+              }
+            },
+            {
+              "docs": [],
+              "indexed": false,
+              "label": "recipient",
+              "type": {
+                "displayName": [
+                  "Bytes"
+                ],
+                "type": 7
+              }
+            },
+            {
+              "docs": [],
+              "indexed": false,
+              "label": "depositor",
+              "type": {
+                "displayName": [
+                  "AccountId"
+                ],
+                "type": 2
+              }
+            },
+            {
+              "docs": [],
+              "indexed": false,
+              "label": "dest_token",
+              "type": {
+                "displayName": [
+                  "Bytes"
+                ],
+                "type": 7
+              }
+            },
+            {
+              "docs": [],
+              "indexed": false,
+              "label": "message",
+              "type": {
+                "displayName": [
+                  "Bytes"
+                ],
+                "type": 7
+              }
+            }
+          ],
+          "docs": [],
+          "label": "FundsDepositedWithMessage"
+        },
+        {
+          "args": [
+            {
+              "docs": [],
+              "indexed": true,
+              "label": "message_hash",
+              "type": {
+                "displayName": [
+                  "Bytes32"
+                ],
+                "type": 3
+              }
+            },
+            {
+              "docs": [],
+              "indexed": false,
+              "label": "forwarder",
+              "type": {
+                "displayName": [
+                  "AccountId"
+                ],
+                "type": 2
+              }
+            },
+            {
+              "docs": [],
+              "indexed": true,
+              "label": "nonce",
+              "type": {
+                "displayName": [
+                  "u128"
+                ],
+                "type": 4
+              }
+            },
+            {
+              "docs": [],
+              "indexed": true,
+              "label": "deposit_id",
+              "type": {
+                "displayName": [
+                  "u128"
+                ],
+                "type": 4
+              }
+            },
+            {
+              "docs": [],
+              "indexed": true,
+              "label": "src_chain_id",
+              "type": {
+                "displayName": [
+                  "Bytes32"
+                ],
+                "type": 3
+              }
+            },
+            {
+              "docs": [],
+              "indexed": false,
+              "label": "dest_token",
+              "type": {
+                "displayName": [
+                  "AccountId"
+                ],
+                "type": 2
+              }
+            },
+            {
+              "docs": [],
+              "indexed": false,
+              "label": "dest_amount",
+              "type": {
+                "displayName": [
+                  "u128"
+                ],
+                "type": 4
+              }
+            },
+            {
+              "docs": [],
+              "indexed": false,
+              "label": "forwarder_router_address",
+              "type": {
+                "displayName": [
+                  "InkString"
+                ],
+                "type": 0
+              }
+            }
+          ],
+          "docs": [],
+          "label": "FundsPaid"
+        },
+        {
+          "args": [
+            {
+              "docs": [],
+              "indexed": true,
+              "label": "message_hash",
+              "type": {
+                "displayName": [
+                  "Bytes32"
+                ],
+                "type": 3
+              }
+            },
+            {
+              "docs": [],
+              "indexed": false,
+              "label": "forwarder",
+              "type": {
+                "displayName": [
+                  "AccountId"
+                ],
+                "type": 2
+              }
+            },
+            {
+              "docs": [],
+              "indexed": true,
+              "label": "nonce",
+              "type": {
+                "displayName": [
+                  "u128"
+                ],
+                "type": 4
+              }
+            },
+            {
+              "docs": [],
+              "indexed": true,
+              "label": "deposit_id",
+              "type": {
+                "displayName": [
+                  "u128"
+                ],
+                "type": 4
+              }
+            },
+            {
+              "docs": [],
+              "indexed": false,
+              "label": "exec_flag",
+              "type": {
+                "displayName": [
+                  "bool"
+                ],
+                "type": 5
+              }
+            },
+            {
+              "docs": [],
+              "indexed": false,
+              "label": "exec_data",
+              "type": {
+                "displayName": [
+                  "Bytes"
+                ],
+                "type": 7
+              }
+            },
+            {
+              "docs": [],
+              "indexed": true,
+              "label": "src_chain_id",
+              "type": {
+                "displayName": [
+                  "Bytes32"
+                ],
+                "type": 3
+              }
+            },
+            {
+              "docs": [],
+              "indexed": false,
+              "label": "dest_token",
+              "type": {
+                "displayName": [
+                  "AccountId"
+                ],
+                "type": 2
+              }
+            },
+            {
+              "docs": [],
+              "indexed": false,
+              "label": "dest_amount",
+              "type": {
+                "displayName": [
+                  "u128"
+                ],
+                "type": 4
+              }
+            },
+            {
+              "docs": [],
+              "indexed": false,
+              "label": "forwarder_router_address",
+              "type": {
+                "displayName": [
+                  "InkString"
+                ],
+                "type": 0
+              }
+            }
+          ],
+          "docs": [],
+          "label": "FundsPaidWithMessage"
+        },
+        {
+          "args": [
+            {
+              "docs": [],
+              "indexed": true,
+              "label": "src_token",
+              "type": {
+                "displayName": [
+                  "AccountId"
+                ],
+                "type": 2
+              }
+            },
+            {
+              "docs": [],
+              "indexed": false,
+              "label": "fee_amount",
+              "type": {
+                "displayName": [
+                  "u128"
+                ],
+                "type": 4
+              }
+            },
+            {
+              "docs": [],
+              "indexed": true,
+              "label": "deposit_id",
+              "type": {
+                "displayName": [
+                  "u128"
+                ],
+                "type": 4
+              }
+            },
+            {
+              "docs": [],
+              "indexed": true,
+              "label": "event_nonce",
+              "type": {
+                "displayName": [
+                  "u128"
+                ],
+                "type": 4
+              }
+            },
+            {
+              "docs": [],
+              "indexed": false,
+              "label": "initiate_withdrawal",
+              "type": {
+                "displayName": [
+                  "bool"
+                ],
+                "type": 5
+              }
+            },
+            {
+              "docs": [],
+              "indexed": false,
+              "label": "depositor",
+              "type": {
+                "displayName": [
+                  "AccountId"
+                ],
+                "type": 2
+              }
+            }
+          ],
+          "docs": [
+            "Event emitted when the valset is updated"
+          ],
+          "label": "DepositInfoUpdate"
+        }
+      ],
+      "lang_error": {
+        "displayName": [
+          "ink",
+          "LangError"
+        ],
+        "type": 10
+      },
+      "messages": [
+        {
+          "args": [
+            {
+              "label": "src_token",
+              "type": {
+                "displayName": [
+                  "AccountId"
+                ],
+                "type": 2
+              }
+            },
+            {
+              "label": "fee_amount",
+              "type": {
+                "displayName": [
+                  "u128"
+                ],
+                "type": 4
+              }
+            },
+            {
+              "label": "deposit_id",
+              "type": {
+                "displayName": [
+                  "u128"
+                ],
+                "type": 4
+              }
+            },
+            {
+              "label": "initiate_withdrawal",
+              "type": {
+                "displayName": [
+                  "bool"
+                ],
+                "type": 5
+              }
+            }
+          ],
+          "default": false,
+          "docs": [
+            "  Interactions"
+          ],
+          "label": "ideposit_info_update",
+          "mutates": true,
+          "payable": true,
+          "returnType": {
+            "displayName": [
+              "ink",
+              "MessageResult"
+            ],
+            "type": 11
+          },
+          "selector": "0x6022c00b"
+        },
+        {
+          "args": [
+            {
+              "label": "deposit_data",
+              "type": {
+                "displayName": [
+                  "DepositData"
+                ],
+                "type": 14
+              }
+            },
+            {
+              "label": "dst_token",
+              "type": {
+                "displayName": [
+                  "Bytes"
+                ],
+                "type": 7
+              }
+            },
+            {
+              "label": "recipient",
+              "type": {
+                "displayName": [
+                  "Bytes"
+                ],
+                "type": 7
+              }
+            }
+          ],
+          "default": false,
+          "docs": [],
+          "label": "i_deposit",
+          "mutates": true,
+          "payable": true,
+          "returnType": {
+            "displayName": [
+              "ink",
+              "MessageResult"
+            ],
+            "type": 11
+          },
+          "selector": "0xb82eb775"
+        },
+        {
+          "args": [
+            {
+              "label": "deposit_data",
+              "type": {
+                "displayName": [
+                  "DepositData"
+                ],
+                "type": 14
+              }
+            },
+            {
+              "label": "dst_token",
+              "type": {
+                "displayName": [
+                  "Bytes"
+                ],
+                "type": 7
+              }
+            },
+            {
+              "label": "recipient",
+              "type": {
+                "displayName": [
+                  "Bytes"
+                ],
+                "type": 7
+              }
+            },
+            {
+              "label": "message",
+              "type": {
+                "displayName": [
+                  "Bytes"
+                ],
+                "type": 7
+              }
+            }
+          ],
+          "default": false,
+          "docs": [],
+          "label": "i_deposit_message",
+          "mutates": true,
+          "payable": true,
+          "returnType": {
+            "displayName": [
+              "ink",
+              "MessageResult"
+            ],
+            "type": 11
+          },
+          "selector": "0x8df3c14b"
+        },
+        {
+          "args": [
+            {
+              "label": "relay_data",
+              "type": {
+                "displayName": [
+                  "RelayData"
+                ],
+                "type": 15
+              }
+            },
+            {
+              "label": "forwarder_router_address",
+              "type": {
+                "displayName": [
+                  "InkString"
+                ],
+                "type": 0
+              }
+            }
+          ],
+          "default": false,
+          "docs": [],
+          "label": "i_relay",
+          "mutates": true,
+          "payable": true,
+          "returnType": {
+            "displayName": [
+              "ink",
+              "MessageResult"
+            ],
+            "type": 11
+          },
+          "selector": "0x0d84373f"
+        },
+        {
+          "args": [
+            {
+              "label": "relay_data",
+              "type": {
+                "displayName": [
+                  "RelayDataMessage"
+                ],
+                "type": 16
+              }
+            },
+            {
+              "label": "forwarder_router_address",
+              "type": {
+                "displayName": [
+                  "InkString"
+                ],
+                "type": 0
+              }
+            }
+          ],
+          "default": false,
+          "docs": [],
+          "label": "i_relay_message",
+          "mutates": true,
+          "payable": true,
+          "returnType": {
+            "displayName": [
+              "ink",
+              "MessageResult"
+            ],
+            "type": 11
+          },
+          "selector": "0x65d1672b"
+        },
+        {
+          "args": [
+            {
+              "label": "request_sender",
+              "type": {
+                "displayName": [
+                  "InkString"
+                ],
+                "type": 0
+              }
+            },
+            {
+              "label": "packet",
+              "type": {
+                "displayName": [
+                  "InkVec"
+                ],
+                "type": 7
+              }
+            },
+            {
+              "label": "src_chain_id",
+              "type": {
+                "displayName": [
+                  "InkString"
+                ],
+                "type": 0
+              }
+            }
+          ],
+          "default": false,
+          "docs": [],
+          "label": "i_receive",
+          "mutates": true,
+          "payable": false,
+          "returnType": {
+            "displayName": [
+              "ink",
+              "MessageResult"
+            ],
+            "type": 17
+          },
+          "selector": "0x258404e2"
+        },
+        {
+          "args": [],
+          "default": false,
+          "docs": [
+            "  Setters"
+          ],
+          "label": "pause",
+          "mutates": true,
+          "payable": false,
+          "returnType": {
+            "displayName": [
+              "ink",
+              "MessageResult"
+            ],
+            "type": 19
+          },
+          "selector": "0x81e0c604"
+        },
+        {
+          "args": [],
+          "default": false,
+          "docs": [],
+          "label": "unpause",
+          "mutates": true,
+          "payable": false,
+          "returnType": {
+            "displayName": [
+              "ink",
+              "MessageResult"
+            ],
+            "type": 19
+          },
+          "selector": "0x67616649"
+        },
+        {
+          "args": [
+            {
+              "label": "role",
+              "type": {
+                "displayName": [
+                  "InkVec"
+                ],
+                "type": 7
+              }
+            },
+            {
+              "label": "account",
+              "type": {
+                "displayName": [
+                  "AccountId"
+                ],
+                "type": 2
+              }
+            }
+          ],
+          "default": false,
+          "docs": [
+            " Grant role to the account."
+          ],
+          "label": "grant_role",
+          "mutates": true,
+          "payable": false,
+          "returnType": {
+            "displayName": [
+              "ink",
+              "MessageResult"
+            ],
+            "type": 21
+          },
+          "selector": "0x2aabfab5"
+        },
+        {
+          "args": [
+            {
+              "label": "role",
+              "type": {
+                "displayName": [
+                  "InkVec"
+                ],
+                "type": 7
+              }
+            },
+            {
+              "label": "account",
+              "type": {
+                "displayName": [
+                  "AccountId"
+                ],
+                "type": 2
+              }
+            }
+          ],
+          "default": false,
+          "docs": [
+            " Grant role of the account."
+          ],
+          "label": "revoke_role",
+          "mutates": true,
+          "payable": false,
+          "returnType": {
+            "displayName": [
+              "ink",
+              "MessageResult"
+            ],
+            "type": 21
+          },
+          "selector": "0x35e1ef4a"
+        },
+        {
+          "args": [
+            {
+              "label": "router_middleware_base",
+              "type": {
+                "displayName": [
+                  "InkString"
+                ],
+                "type": 0
+              }
+            }
+          ],
+          "default": false,
+          "docs": [],
+          "label": "set_router_middleware_base",
+          "mutates": true,
+          "payable": false,
+          "returnType": {
+            "displayName": [
+              "ink",
+              "MessageResult"
+            ],
+            "type": 21
+          },
+          "selector": "0xbe476e48"
+        },
+        {
+          "args": [
+            {
+              "label": "chain_id",
+              "type": {
+                "displayName": [
+                  "InkString"
+                ],
+                "type": 0
+              }
+            }
+          ],
+          "default": false,
+          "docs": [],
+          "label": "set_chain_id",
+          "mutates": true,
+          "payable": false,
+          "returnType": {
+            "displayName": [
+              "ink",
+              "MessageResult"
+            ],
+            "type": 21
+          },
+          "selector": "0x986c0af9"
+        },
+        {
+          "args": [
+            {
+              "label": "gateway",
+              "type": {
+                "displayName": [
+                  "AccountId"
+                ],
+                "type": 2
+              }
+            }
+          ],
+          "default": false,
+          "docs": [],
+          "label": "set_gateway",
+          "mutates": true,
+          "payable": false,
+          "returnType": {
+            "displayName": [
+              "ink",
+              "MessageResult"
+            ],
+            "type": 21
+          },
+          "selector": "0xbcab8a1d"
+        },
+        {
+          "args": [
+            {
+              "label": "code_hash",
+              "type": {
+                "displayName": [],
+                "type": 3
+              }
+            }
+          ],
+          "default": false,
+          "docs": [],
+          "label": "set_code",
+          "mutates": true,
+          "payable": false,
+          "returnType": {
+            "displayName": [
+              "ink",
+              "MessageResult"
+            ],
+            "type": 21
+          },
+          "selector": "0x694fb50f"
+        },
+        {
+          "args": [],
+          "default": false,
+          "docs": [
+            "  Getters"
+          ],
+          "label": "get_contract_address",
+          "mutates": false,
+          "payable": false,
+          "returnType": {
+            "displayName": [
+              "ink",
+              "MessageResult"
+            ],
+            "type": 23
+          },
+          "selector": "0x61f8c91f"
+        },
+        {
+          "args": [],
+          "default": false,
+          "docs": [],
+          "label": "get_pause_value",
+          "mutates": false,
+          "payable": false,
+          "returnType": {
+            "displayName": [
+              "ink",
+              "MessageResult"
+            ],
+            "type": 24
+          },
+          "selector": "0x77b4e15f"
+        },
+        {
+          "args": [],
+          "default": false,
+          "docs": [
+            " Simply returns the current value of our `src_chain_id`."
+          ],
+          "label": "get_chain_id",
+          "mutates": false,
+          "payable": false,
+          "returnType": {
+            "displayName": [
+              "ink",
+              "MessageResult"
+            ],
+            "type": 25
+          },
+          "selector": "0x758fd2bc"
+        },
+        {
+          "args": [],
+          "default": false,
+          "docs": [],
+          "label": "get_deposit_nonce",
+          "mutates": false,
+          "payable": false,
+          "returnType": {
+            "displayName": [
+              "ink",
+              "MessageResult"
+            ],
+            "type": 26
+          },
+          "selector": "0xecc22a27"
+        },
+        {
+          "args": [
+            {
+              "label": "message_hash",
+              "type": {
+                "displayName": [
+                  "Bytes32"
+                ],
+                "type": 3
+              }
+            }
+          ],
+          "default": false,
+          "docs": [],
+          "label": "get_execute_record",
+          "mutates": false,
+          "payable": false,
+          "returnType": {
+            "displayName": [
+              "ink",
+              "MessageResult"
+            ],
+            "type": 24
+          },
+          "selector": "0x7e6fce27"
+        },
+        {
+          "args": [
+            {
+              "label": "role",
+              "type": {
+                "displayName": [
+                  "InkVec"
+                ],
+                "type": 7
+              }
+            },
+            {
+              "label": "account",
+              "type": {
+                "displayName": [
+                  "AccountId"
+                ],
+                "type": 2
+              }
+            }
+          ],
+          "default": false,
+          "docs": [
+            " Returns `true` if `account` has been granted `role`."
+          ],
+          "label": "has_role",
+          "mutates": false,
+          "payable": false,
+          "returnType": {
+            "displayName": [
+              "ink",
+              "MessageResult"
+            ],
+            "type": 24
+          },
+          "selector": "0x8d194a68"
+        },
+        {
+          "args": [
+            {
+              "label": "role",
+              "type": {
+                "displayName": [
+                  "InkVec"
+                ],
+                "type": 7
+              }
+            }
+          ],
+          "default": false,
+          "docs": [
+            " To change a role's admin, use {set_role_admin}."
+          ],
+          "label": "get_role_admin",
+          "mutates": false,
+          "payable": false,
+          "returnType": {
+            "displayName": [
+              "ink",
+              "MessageResult"
+            ],
+            "type": 17
+          },
+          "selector": "0x553f5414"
+        },
+        {
+          "args": [],
+          "default": false,
+          "docs": [],
+          "label": "get_router_middleware_base",
+          "mutates": false,
+          "payable": false,
+          "returnType": {
+            "displayName": [
+              "ink",
+              "MessageResult"
+            ],
+            "type": 23
+          },
+          "selector": "0xe3f11421"
+        },
+        {
+          "args": [],
+          "default": false,
+          "docs": [],
+          "label": "get_gateway",
+          "mutates": false,
+          "payable": false,
+          "returnType": {
+            "displayName": [
+              "ink",
+              "MessageResult"
+            ],
+            "type": 27
+          },
+          "selector": "0xb0d779da"
+        }
+      ]
+    },
+    "storage": {
+      "root": {
+        "layout": {
+          "struct": {
+            "fields": [
+              {
+                "layout": {
+                  "leaf": {
+                    "key": "0x00000000",
+                    "ty": 0
+                  }
+                },
+                "name": "chain_id"
+              },
+              {
+                "layout": {
+                  "array": {
+                    "layout": {
+                      "leaf": {
+                        "key": "0x00000000",
+                        "ty": 1
+                      }
+                    },
+                    "len": 32,
+                    "offset": "0x00000000"
+                  }
+                },
+                "name": "router_middleware_base"
+              },
+              {
+                "layout": {
+                  "leaf": {
+                    "key": "0x00000000",
+                    "ty": 2
+                  }
+                },
+                "name": "gateway"
+              },
+              {
+                "layout": {
+                  "leaf": {
+                    "key": "0x00000000",
+                    "ty": 2
+                  }
+                },
+                "name": "native_token"
+              },
+              {
+                "layout": {
+                  "leaf": {
+                    "key": "0x00000000",
+                    "ty": 4
+                  }
+                },
+                "name": "deposit_nonce"
+              },
+              {
+                "layout": {
+                  "root": {
+                    "layout": {
+                      "leaf": {
+                        "key": "0x29871cca",
+                        "ty": 5
+                      }
+                    },
+                    "root_key": "0x29871cca"
+                  }
+                },
+                "name": "execute_record"
+              },
+              {
+                "layout": {
+                  "root": {
+                    "layout": {
+                      "struct": {
+                        "fields": [
+                          {
+                            "layout": {
+                              "leaf": {
+                                "key": "0x7e8960ca",
+                                "ty": 6
+                              }
+                            },
+                            "name": "members"
+                          },
+                          {
+                            "layout": {
+                              "leaf": {
+                                "key": "0x7e8960ca",
+                                "ty": 7
+                              }
+                            },
+                            "name": "admin_role"
+                          }
+                        ],
+                        "name": "RoleData"
+                      }
+                    },
+                    "root_key": "0x7e8960ca"
+                  }
+                },
+                "name": "roles"
+              },
+              {
+                "layout": {
+                  "leaf": {
+                    "key": "0x00000000",
+                    "ty": 5
+                  }
+                },
+                "name": "paused"
+              }
+            ],
+            "name": "AssetForwarder"
+          }
+        },
+        "root_key": "0x00000000"
+      }
+    },
+    "types": [
+      {
+        "id": 0,
+        "type": {
+          "def": {
+            "primitive": "str"
+          }
+        }
+      },
+      {
+        "id": 1,
+        "type": {
+          "def": {
+            "primitive": "u8"
+          }
+        }
+      },
+      {
+        "id": 2,
+        "type": {
+          "def": {
+            "composite": {
+              "fields": [
+                {
+                  "type": 3,
+                  "typeName": "[u8; 32]"
+                }
+              ]
+            }
+          },
+          "path": [
+            "ink_primitives",
+            "types",
+            "AccountId"
+          ]
+        }
+      },
+      {
+        "id": 3,
+        "type": {
+          "def": {
+            "array": {
+              "len": 32,
+              "type": 1
+            }
+          }
+        }
+      },
+      {
+        "id": 4,
+        "type": {
+          "def": {
+            "primitive": "u128"
+          }
+        }
+      },
+      {
+        "id": 5,
+        "type": {
+          "def": {
+            "primitive": "bool"
+          }
+        }
+      },
+      {
+        "id": 6,
+        "type": {
+          "def": {
+            "sequence": {
+              "type": 2
+            }
+          }
+        }
+      },
+      {
+        "id": 7,
+        "type": {
+          "def": {
+            "sequence": {
+              "type": 1
+            }
+          }
+        }
+      },
+      {
+        "id": 8,
+        "type": {
+          "def": {
+            "variant": {
+              "variants": [
+                {
+                  "fields": [
+                    {
+                      "type": 9
+                    }
+                  ],
+                  "index": 0,
+                  "name": "Ok"
+                },
+                {
+                  "fields": [
+                    {
+                      "type": 10
+                    }
+                  ],
+                  "index": 1,
+                  "name": "Err"
+                }
+              ]
+            }
+          },
+          "params": [
+            {
+              "name": "T",
+              "type": 9
+            },
+            {
+              "name": "E",
+              "type": 10
+            }
+          ],
+          "path": [
+            "Result"
+          ]
+        }
+      },
+      {
+        "id": 9,
+        "type": {
+          "def": {
+            "tuple": []
+          }
+        }
+      },
+      {
+        "id": 10,
+        "type": {
+          "def": {
+            "variant": {
+              "variants": [
+                {
+                  "index": 1,
+                  "name": "CouldNotReadInput"
+                }
+              ]
+            }
+          },
+          "path": [
+            "ink_primitives",
+            "LangError"
+          ]
+        }
+      },
+      {
+        "id": 11,
+        "type": {
+          "def": {
+            "variant": {
+              "variants": [
+                {
+                  "fields": [
+                    {
+                      "type": 12
+                    }
+                  ],
+                  "index": 0,
+                  "name": "Ok"
+                },
+                {
+                  "fields": [
+                    {
+                      "type": 10
+                    }
+                  ],
+                  "index": 1,
+                  "name": "Err"
+                }
+              ]
+            }
+          },
+          "params": [
+            {
+              "name": "T",
+              "type": 12
+            },
+            {
+              "name": "E",
+              "type": 10
+            }
+          ],
+          "path": [
+            "Result"
+          ]
+        }
+      },
+      {
+        "id": 12,
+        "type": {
+          "def": {
+            "variant": {
+              "variants": [
+                {
+                  "fields": [
+                    {
+                      "type": 4
+                    }
+                  ],
+                  "index": 0,
+                  "name": "Ok"
+                },
+                {
+                  "fields": [
+                    {
+                      "type": 13
+                    }
+                  ],
+                  "index": 1,
+                  "name": "Err"
+                }
+              ]
+            }
+          },
+          "params": [
+            {
+              "name": "T",
+              "type": 4
+            },
+            {
+              "name": "E",
+              "type": 13
+            }
+          ],
+          "path": [
+            "Result"
+          ]
+        }
+      },
+      {
+        "id": 13,
+        "type": {
+          "def": {
+            "variant": {
+              "variants": [
+                {
+                  "index": 0,
+                  "name": "TheSenderIsMaliciousContract"
+                },
+                {
+                  "index": 1,
+                  "name": "RoleIsNotPresent"
+                },
+                {
+                  "index": 2,
+                  "name": "IsPaused"
+                },
+                {
+                  "index": 3,
+                  "name": "IsUnpaused"
+                },
+                {
+                  "index": 4,
+                  "name": "SenderMustBeAnAdmin"
+                },
+                {
+                  "index": 5,
+                  "name": "AccountAlreadyHasTheRole"
+                },
+                {
+                  "index": 6,
+                  "name": "AccountDoesNotHasTheRole"
+                },
+                {
+                  "fields": [
+                    {
+                      "type": 0,
+                      "typeName": "InkString"
+                    },
+                    {
+                      "type": 0,
+                      "typeName": "InkString"
+                    }
+                  ],
+                  "index": 7,
+                  "name": "InvalidDstChainId"
+                },
+                {
+                  "index": 8,
+                  "name": "InvalidAddress"
+                },
+                {
+                  "fields": [
+                    {
+                      "type": 0,
+                      "typeName": "InkString"
+                    }
+                  ],
+                  "index": 9,
+                  "name": "GenericError"
+                },
+                {
+                  "index": 10,
+                  "name": "AmountToLarge"
+                },
+                {
+                  "index": 11,
+                  "name": "InvalidAmount"
+                },
+                {
+                  "index": 12,
+                  "name": "MessageHashCalculateError"
+                },
+                {
+                  "index": 13,
+                  "name": "AlreadyExecuted"
+                },
+                {
+                  "index": 14,
+                  "name": "InvalidRefundData"
+                },
+                {
+                  "index": 15,
+                  "name": "TransferFailed"
+                },
+                {
+                  "index": 16,
+                  "name": "InvalidRecipient"
+                },
+                {
+                  "index": 17,
+                  "name": "InvalidTransferredValue"
+                },
+                {
+                  "index": 18,
+                  "name": "NativeTransferFailed"
+                },
+                {
+                  "index": 19,
+                  "name": "InvalidSenderOrSrcChainId"
+                },
+                {
+                  "index": 20,
+                  "name": "OnlyResourceSetter"
+                },
+                {
+                  "index": 21,
+                  "name": "OnlyAdmin"
+                }
+              ]
+            }
+          },
+          "path": [
+            "asset_forwarder",
+            "types",
+            "types",
+            "Error"
+          ]
+        }
+      },
+      {
+        "id": 14,
+        "type": {
+          "def": {
+            "composite": {
+              "fields": [
+                {
+                  "name": "partner_id",
+                  "type": 4,
+                  "typeName": "u128"
+                },
+                {
+                  "name": "amount",
+                  "type": 4,
+                  "typeName": "u128"
+                },
+                {
+                  "name": "dest_amount",
+                  "type": 4,
+                  "typeName": "u128"
+                },
+                {
+                  "name": "src_token",
+                  "type": 2,
+                  "typeName": "AccountId"
+                },
+                {
+                  "name": "refund_recipient",
+                  "type": 2,
+                  "typeName": "AccountId"
+                },
+                {
+                  "name": "dest_chain_id_bytes",
+                  "type": 3,
+                  "typeName": "Bytes32"
+                }
+              ]
+            }
+          },
+          "path": [
+            "asset_forwarder",
+            "types",
+            "types",
+            "DepositData"
+          ]
+        }
+      },
+      {
+        "id": 15,
+        "type": {
+          "def": {
+            "composite": {
+              "fields": [
+                {
+                  "name": "amount",
+                  "type": 4,
+                  "typeName": "u128"
+                },
+                {
+                  "name": "src_chain_id",
+                  "type": 3,
+                  "typeName": "Bytes32"
+                },
+                {
+                  "name": "deposit_id",
+                  "type": 4,
+                  "typeName": "u128"
+                },
+                {
+                  "name": "dest_token",
+                  "type": 2,
+                  "typeName": "AccountId"
+                },
+                {
+                  "name": "recipient",
+                  "type": 7,
+                  "typeName": "InkVec<u8>"
+                }
+              ]
+            }
+          },
+          "path": [
+            "asset_forwarder",
+            "types",
+            "types",
+            "RelayData"
+          ]
+        }
+      },
+      {
+        "id": 16,
+        "type": {
+          "def": {
+            "composite": {
+              "fields": [
+                {
+                  "name": "amount",
+                  "type": 4,
+                  "typeName": "u128"
+                },
+                {
+                  "name": "src_chain_id",
+                  "type": 3,
+                  "typeName": "Bytes32"
+                },
+                {
+                  "name": "deposit_id",
+                  "type": 4,
+                  "typeName": "u128"
+                },
+                {
+                  "name": "dest_token",
+                  "type": 2,
+                  "typeName": "AccountId"
+                },
+                {
+                  "name": "recipient",
+                  "type": 7,
+                  "typeName": "InkVec<u8>"
+                },
+                {
+                  "name": "message",
+                  "type": 7,
+                  "typeName": "InkVec<u8>"
+                }
+              ]
+            }
+          },
+          "path": [
+            "asset_forwarder",
+            "types",
+            "types",
+            "RelayDataMessage"
+          ]
+        }
+      },
+      {
+        "id": 17,
+        "type": {
+          "def": {
+            "variant": {
+              "variants": [
+                {
+                  "fields": [
+                    {
+                      "type": 18
+                    }
+                  ],
+                  "index": 0,
+                  "name": "Ok"
+                },
+                {
+                  "fields": [
+                    {
+                      "type": 10
+                    }
+                  ],
+                  "index": 1,
+                  "name": "Err"
+                }
+              ]
+            }
+          },
+          "params": [
+            {
+              "name": "T",
+              "type": 18
+            },
+            {
+              "name": "E",
+              "type": 10
+            }
+          ],
+          "path": [
+            "Result"
+          ]
+        }
+      },
+      {
+        "id": 18,
+        "type": {
+          "def": {
+            "variant": {
+              "variants": [
+                {
+                  "fields": [
+                    {
+                      "type": 7
+                    }
+                  ],
+                  "index": 0,
+                  "name": "Ok"
+                },
+                {
+                  "fields": [
+                    {
+                      "type": 13
+                    }
+                  ],
+                  "index": 1,
+                  "name": "Err"
+                }
+              ]
+            }
+          },
+          "params": [
+            {
+              "name": "T",
+              "type": 7
+            },
+            {
+              "name": "E",
+              "type": 13
+            }
+          ],
+          "path": [
+            "Result"
+          ]
+        }
+      },
+      {
+        "id": 19,
+        "type": {
+          "def": {
+            "variant": {
+              "variants": [
+                {
+                  "fields": [
+                    {
+                      "type": 20
+                    }
+                  ],
+                  "index": 0,
+                  "name": "Ok"
+                },
+                {
+                  "fields": [
+                    {
+                      "type": 10
+                    }
+                  ],
+                  "index": 1,
+                  "name": "Err"
+                }
+              ]
+            }
+          },
+          "params": [
+            {
+              "name": "T",
+              "type": 20
+            },
+            {
+              "name": "E",
+              "type": 10
+            }
+          ],
+          "path": [
+            "Result"
+          ]
+        }
+      },
+      {
+        "id": 20,
+        "type": {
+          "def": {
+            "variant": {
+              "variants": [
+                {
+                  "fields": [
+                    {
+                      "type": 5
+                    }
+                  ],
+                  "index": 0,
+                  "name": "Ok"
+                },
+                {
+                  "fields": [
+                    {
+                      "type": 13
+                    }
+                  ],
+                  "index": 1,
+                  "name": "Err"
+                }
+              ]
+            }
+          },
+          "params": [
+            {
+              "name": "T",
+              "type": 5
+            },
+            {
+              "name": "E",
+              "type": 13
+            }
+          ],
+          "path": [
+            "Result"
+          ]
+        }
+      },
+      {
+        "id": 21,
+        "type": {
+          "def": {
+            "variant": {
+              "variants": [
+                {
+                  "fields": [
+                    {
+                      "type": 22
+                    }
+                  ],
+                  "index": 0,
+                  "name": "Ok"
+                },
+                {
+                  "fields": [
+                    {
+                      "type": 10
+                    }
+                  ],
+                  "index": 1,
+                  "name": "Err"
+                }
+              ]
+            }
+          },
+          "params": [
+            {
+              "name": "T",
+              "type": 22
+            },
+            {
+              "name": "E",
+              "type": 10
+            }
+          ],
+          "path": [
+            "Result"
+          ]
+        }
+      },
+      {
+        "id": 22,
+        "type": {
+          "def": {
+            "variant": {
+              "variants": [
+                {
+                  "fields": [
+                    {
+                      "type": 9
+                    }
+                  ],
+                  "index": 0,
+                  "name": "Ok"
+                },
+                {
+                  "fields": [
+                    {
+                      "type": 13
+                    }
+                  ],
+                  "index": 1,
+                  "name": "Err"
+                }
+              ]
+            }
+          },
+          "params": [
+            {
+              "name": "T",
+              "type": 9
+            },
+            {
+              "name": "E",
+              "type": 13
+            }
+          ],
+          "path": [
+            "Result"
+          ]
+        }
+      },
+      {
+        "id": 23,
+        "type": {
+          "def": {
+            "variant": {
+              "variants": [
+                {
+                  "fields": [
+                    {
+                      "type": 3
+                    }
+                  ],
+                  "index": 0,
+                  "name": "Ok"
+                },
+                {
+                  "fields": [
+                    {
+                      "type": 10
+                    }
+                  ],
+                  "index": 1,
+                  "name": "Err"
+                }
+              ]
+            }
+          },
+          "params": [
+            {
+              "name": "T",
+              "type": 3
+            },
+            {
+              "name": "E",
+              "type": 10
+            }
+          ],
+          "path": [
+            "Result"
+          ]
+        }
+      },
+      {
+        "id": 24,
+        "type": {
+          "def": {
+            "variant": {
+              "variants": [
+                {
+                  "fields": [
+                    {
+                      "type": 5
+                    }
+                  ],
+                  "index": 0,
+                  "name": "Ok"
+                },
+                {
+                  "fields": [
+                    {
+                      "type": 10
+                    }
+                  ],
+                  "index": 1,
+                  "name": "Err"
+                }
+              ]
+            }
+          },
+          "params": [
+            {
+              "name": "T",
+              "type": 5
+            },
+            {
+              "name": "E",
+              "type": 10
+            }
+          ],
+          "path": [
+            "Result"
+          ]
+        }
+      },
+      {
+        "id": 25,
+        "type": {
+          "def": {
+            "variant": {
+              "variants": [
+                {
+                  "fields": [
+                    {
+                      "type": 0
+                    }
+                  ],
+                  "index": 0,
+                  "name": "Ok"
+                },
+                {
+                  "fields": [
+                    {
+                      "type": 10
+                    }
+                  ],
+                  "index": 1,
+                  "name": "Err"
+                }
+              ]
+            }
+          },
+          "params": [
+            {
+              "name": "T",
+              "type": 0
+            },
+            {
+              "name": "E",
+              "type": 10
+            }
+          ],
+          "path": [
+            "Result"
+          ]
+        }
+      },
+      {
+        "id": 26,
+        "type": {
+          "def": {
+            "variant": {
+              "variants": [
+                {
+                  "fields": [
+                    {
+                      "type": 4
+                    }
+                  ],
+                  "index": 0,
+                  "name": "Ok"
+                },
+                {
+                  "fields": [
+                    {
+                      "type": 10
+                    }
+                  ],
+                  "index": 1,
+                  "name": "Err"
+                }
+              ]
+            }
+          },
+          "params": [
+            {
+              "name": "T",
+              "type": 4
+            },
+            {
+              "name": "E",
+              "type": 10
+            }
+          ],
+          "path": [
+            "Result"
+          ]
+        }
+      },
+      {
+        "id": 27,
+        "type": {
+          "def": {
+            "variant": {
+              "variants": [
+                {
+                  "fields": [
+                    {
+                      "type": 2
+                    }
+                  ],
+                  "index": 0,
+                  "name": "Ok"
+                },
+                {
+                  "fields": [
+                    {
+                      "type": 10
+                    }
+                  ],
+                  "index": 1,
+                  "name": "Err"
+                }
+              ]
+            }
+          },
+          "params": [
+            {
+              "name": "T",
+              "type": 2
+            },
+            {
+              "name": "E",
+              "type": 10
+            }
+          ],
+          "path": [
+            "Result"
+          ]
+        }
+      },
+      {
+        "id": 28,
+        "type": {
+          "def": {
+            "composite": {
+              "fields": [
+                {
+                  "type": 3,
+                  "typeName": "[u8; 32]"
+                }
+              ]
+            }
+          },
+          "path": [
+            "ink_primitives",
+            "types",
+            "Hash"
+          ]
+        }
+      },
+      {
+        "id": 29,
+        "type": {
+          "def": {
+            "primitive": "u64"
+          }
+        }
+      },
+      {
+        "id": 30,
+        "type": {
+          "def": {
+            "primitive": "u32"
+          }
+        }
+      },
+      {
+        "id": 31,
+        "type": {
+          "def": {
+            "variant": {}
+          },
+          "path": [
+            "ink_env",
+            "types",
+            "NoChainExtension"
+          ]
+        }
+      }
+    ],
+    "version": "4"
+  }
