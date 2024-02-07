@@ -17,8 +17,8 @@ app.get('/', (req: Request, res: Response) => {
     res.send('Hello, the Azero streaming service is working!');
 });
 
-app.use('/health', healthCheck);
-app.use('/logs', fetchLogs); // Fetch logs route
+app.use('/', healthCheck);
+app.use('/', fetchLogs); // Fetch logs route
 
 async function main() {
     try {

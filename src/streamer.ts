@@ -35,6 +35,7 @@ async function processBlockEvents(api: ApiPromise, blockNumber: number) {
                 await processEvent(event, blockNumber);
             }
         }
+        
     } catch (error) {
         logger.error(`Error processing block ${blockNumber}: ${error}`);
         // Implement retry logic or additional error handling here
@@ -52,7 +53,6 @@ async function processEvent(event: Event, blockNumber: number) {
 
     const decodedEvent = abi.decodeEvent(Uint8Array.from(Buffer.from(event.data[1].toHex().slice(2), "hex")));
     const formattedEvent: EventData = formatEvent(decodedEvent);
-
     logger.info(`Contract Event at Block ${blockNumber}: ${decodedEvent.event.identifier}`);
     logger.info(`Event Data: ${JSON.stringify(formattedEvent, null, 2)}`);
 
@@ -110,7 +110,9 @@ export async function startStreamService() {
 
 async function determineStartBlock(chainStateCollection: Collection<Document> | Collection<Document> | undefined) {
     const lastSyncedBlock = await getLastSyncedBlock(chainStateCollection as any);
+    console.log("lastSyncedBlock : ", lastSyncedBlock)
     return lastSyncedBlock > 0 ? lastSyncedBlock : START_BLOCK_HEIGHT;
+    //return START_BLOCK_HEIGHT
 }
 
 
