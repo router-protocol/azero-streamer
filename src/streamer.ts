@@ -16,8 +16,9 @@ interface ContractAbis {
 }
 
 interface EventData {
-    [key: string]: string | number;
+    [key: string]: string | number | boolean;
 }
+
 
 const contractAbis: ContractAbis = {};
 Object.keys(CONTRACTS_TO_ABI_PATHS).forEach((address) => {
@@ -63,12 +64,18 @@ function formatEvent(decodedEvent: DecodedEvent) {
     const formattedEvent: EventData = {};
     decodedEvent.args.forEach((arg, index) => {
         const argName = decodedEvent.event.args[index].name;
-        formattedEvent[argName] = formatArg(arg);
+        // Pass argName to formatArg to handle execStatus conversion
+        formattedEvent[argName] = formatArg(arg, argName);
     });
     return formattedEvent;
 }
 
-function formatArg(arg: Codec | ArrayBuffer | { valueOf(): ArrayBuffer | SharedArrayBuffer; }) {
+
+function formatArg(arg: Codec | ArrayBuffer | { valueOf(): ArrayBuffer | SharedArrayBuffer; }, argName: string) {
+    // Check if the argument is the execStatus and convert it to boolean if true
+    if (argName === 'execStatus') {
+        return arg.toString() === 'true';
+    }
     if (arg instanceof BN) {
         return arg.toString();
     } else if (arg instanceof Uint8Array) {
@@ -77,6 +84,7 @@ function formatArg(arg: Codec | ArrayBuffer | { valueOf(): ArrayBuffer | SharedA
         return arg.toString();
     }
 }
+
 
 async function saveEventToDatabase(contractAddress: string, blockNumber: number, eventName: string, eventData: EventData) {
     const collection = await getCollection('contractEvents');
@@ -101,7 +109,9 @@ export async function startStreamService() {
     let currentBlock = await determineStartBlock(chainStateCollection as any);
     logger.info(`Starting streaming service from block ${currentBlock}`);
 
-    while (currentBlock <= END_BLOCK_HEIGHT) {
+    // while (currentBlock <= END_BLOCK_HEIGHT) {
+    while (true) {
+        // console.log(currentBlock)
         await processBlockEvents(api, currentBlock);
         currentBlock++; // Move to the next block
         await updateLastUpdatedBlock(chainStateCollection as any, currentBlock);
@@ -111,8 +121,8 @@ export async function startStreamService() {
 async function determineStartBlock(chainStateCollection: Collection<Document> | Collection<Document> | undefined) {
     const lastSyncedBlock = await getLastSyncedBlock(chainStateCollection as any);
     console.log("lastSyncedBlock : ", lastSyncedBlock)
-    return lastSyncedBlock > 0 ? lastSyncedBlock : START_BLOCK_HEIGHT;
-    //return START_BLOCK_HEIGHT
+    //return lastSyncedBlock > 0 ? lastSyncedBlock : START_BLOCK_HEIGHT;
+    return START_BLOCK_HEIGHT
 }
 
 
