@@ -27,23 +27,42 @@ Object.keys(CONTRACTS_TO_ABI_PATHS).forEach((address) => {
 
 async function processBlockEvents(api: ApiPromise, blockNumber: number) {
     try {
-        const blockHash = await api.rpc.chain.getBlockHash(blockNumber);
-        const events = await api.query.system.events.at(blockHash) as EventRecord[];
-
-        for (const record of events) {
-            const { event } = record;
-            if (event.method === "ContractEmitted" && CONTRACTS_TO_TRACK.includes(event.data[0].toString())) {
-                await processEvent(event, blockNumber);
-            }
-        }
         
+        const blockHash = await api.rpc.chain.getBlockHash(blockNumber);
+        const signedBlock = await api.rpc.chain.getBlock(blockHash);
+        const allEvents = await api.query.system.events.at(blockHash) as EventRecord[];
+
+        // Fetch the block timestamp
+        const timestampCodec = await api.query.timestamp.now.at(blockHash);
+
+        // Assert that the timestamp is indeed a BN (BigNumber) before calling toNumber
+        const timestampMillis = (timestampCodec as any).toBigInt();
+
+        // Convert to UNIX timestamp in seconds
+        const timestamp = Number(timestampMillis) / 1000;
+
+        // Iterate through each extrinsic in the block
+        signedBlock.block.extrinsics.forEach((extrinsic, index) => {
+            // Extrinsics may have multiple associated events, filter relevant events
+            const events = allEvents.filter(({ phase }) =>
+                phase.isApplyExtrinsic && phase.asApplyExtrinsic.eq(index)
+            );
+
+            events.forEach((record) => {
+                const { event } = record;
+                if (event.method === "ContractEmitted" && CONTRACTS_TO_TRACK.includes(event.data[0].toString())) {
+                    // Include the transaction hash (extrinsic hash) in the event processing  
+                    const txHash = extrinsic.hash.toHex();
+                    processEvent(event, blockNumber, txHash, timestamp); // Updated to pass timestamp
+                }
+            });
+        });
     } catch (error) {
         logger.error(`Error processing block ${blockNumber}: ${error}`);
-        // Implement retry logic or additional error handling here
     }
 }
 
-async function processEvent(event: Event, blockNumber: number) {
+async function processEvent(event: Event, blockNumber: number, txHash: string, timestamp: any) {
     const contractAddress = event.data[0].toString();
     const abi = contractAbis[contractAddress];
 
@@ -55,9 +74,12 @@ async function processEvent(event: Event, blockNumber: number) {
     const decodedEvent = abi.decodeEvent(Uint8Array.from(Buffer.from(event.data[1].toHex().slice(2), "hex")));
     const formattedEvent: EventData = formatEvent(decodedEvent);
     logger.info(`Contract Event at Block ${blockNumber}: ${decodedEvent.event.identifier}`);
+    logger.info(`Transaction Hash: ${txHash}`);
+    logger.info(`Timestamp: ${timestamp}`);
     logger.info(`Event Data: ${JSON.stringify(formattedEvent, null, 2)}`);
+   
 
-    await saveEventToDatabase(contractAddress, blockNumber, decodedEvent.event.identifier, formattedEvent);
+    await saveEventToDatabase(contractAddress, blockNumber, decodedEvent.event.identifier, formattedEvent, txHash, timestamp);
 }
 
 function formatEvent(decodedEvent: DecodedEvent) {
@@ -72,29 +94,38 @@ function formatEvent(decodedEvent: DecodedEvent) {
 
 
 function formatArg(arg: Codec | ArrayBuffer | { valueOf(): ArrayBuffer | SharedArrayBuffer; }, argName: string) {
-    // Check if the argument is the execStatus and convert it to boolean if true
-    if (argName === 'execStatus') {
+    // Convert 'execStatus' and 'success' fields to boolean based on their string values
+    if (argName === 'execStatus' || argName === 'success' || argName === 'initiateWithdrawal') {
         return arg.toString() === 'true';
     }
+    
+    // Process and return other fields according to their inherent data types
     if (arg instanceof BN) {
+        // For Big Number instances, convert to string
         return arg.toString();
     } else if (arg instanceof Uint8Array) {
+        // For Uint8Array instances (e.g., byte arrays), convert to hex string
         return `0x${Buffer.from(arg).toString('hex')}`;
     } else {
+        // Fallback for other types, convert directly to string
+        // This might need adjustment based on the specific types and expected formats
         return arg.toString();
     }
 }
 
 
-async function saveEventToDatabase(contractAddress: string, blockNumber: number, eventName: string, eventData: EventData) {
+async function saveEventToDatabase(contractAddress: string, blockNumber: number, eventName: string, eventData: EventData, txHash: string, timestamp: any) {
+
     const collection = await getCollection('contractEvents');
     if (collection) {
         const blockLog = {
             contractAddress,
             blockNumber,
+            txHash, 
+            timestamp,
             eventName,
-            eventData,
-        } as any ;
+            eventData
+        } as any;
         await collection.insertOne(blockLog);
     } else {
         logger.error('Failed to retrieve contractEvents collection');
