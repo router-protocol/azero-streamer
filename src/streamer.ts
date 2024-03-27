@@ -39,8 +39,8 @@ async function processBlockEvents(api: ApiPromise, blockNumber: number) {
         const timestampMillis = (timestampCodec as any).toBigInt();
 
         // Convert to UNIX timestamp in seconds
-        const timestamp = Number(timestampMillis) / 1000;
-
+        const timestamp = Number((Number(timestampMillis) / 1000).toFixed(0));
+        
         // Iterate through each extrinsic in the block
         signedBlock.block.extrinsics.forEach((extrinsic, index) => {
             // Extrinsics may have multiple associated events, filter relevant events
@@ -95,7 +95,7 @@ function formatEvent(decodedEvent: DecodedEvent) {
 
 function formatArg(arg: Codec | ArrayBuffer | { valueOf(): ArrayBuffer | SharedArrayBuffer; }, argName: string) {
     // Convert 'execStatus' and 'success' fields to boolean based on their string values
-    if (argName === 'execStatus' || argName === 'success' || argName === 'initiateWithdrawal') {
+    if (argName === 'execStatus' || argName === 'success' || argName === 'initiateWithdrawal' || argName === 'execFlag') {
         return arg.toString() === 'true';
     }
     
