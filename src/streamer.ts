@@ -27,7 +27,6 @@ Object.keys(CONTRACTS_TO_ABI_PATHS).forEach((address) => {
 
 async function processBlockEvents(api: ApiPromise, blockNumber: number) {
     try {
-        
         const blockHash = await api.rpc.chain.getBlockHash(blockNumber);
         const signedBlock = await api.rpc.chain.getBlock(blockHash);
         const allEvents = await api.query.system.events.at(blockHash) as EventRecord[];
@@ -138,14 +137,23 @@ export async function startStreamService() {
 
     const chainStateCollection = await getCollection('chainState');
     let currentBlock = await determineStartBlock(chainStateCollection as any);
-    logger.info(`Starting streaming service from block ${currentBlock}`);
-
-    // while (currentBlock <= END_BLOCK_HEIGHT) {
     while (true) {
-        // console.log(currentBlock)
-        await processBlockEvents(api, currentBlock);
-        currentBlock++; // Move to the next block
-        await updateLastUpdatedBlock(chainStateCollection as any, currentBlock);
+        const latestBlockHash = await api.rpc.chain.getFinalizedHead();
+        const latestBlock = await api.rpc.chain.getBlock(latestBlockHash);
+        const latestBlockNumber = latestBlock.block.header.number.toNumber();
+
+        if (currentBlock > latestBlockNumber) {
+            logger.info(`Current block number ${currentBlock} is greater than latest block number ${latestBlockNumber}. Waiting to recheck...`);
+            await sleep(30000);  // Wait for 30 seconds before checking again
+            continue;  // Continue to the next iteration of the loop
+        }
+
+        logger.info(`Starting streaming service from block ${currentBlock}`);
+        while (currentBlock <= latestBlockNumber) {
+            await processBlockEvents(api, currentBlock);
+            currentBlock++; // Move to the next block
+            await updateLastUpdatedBlock(chainStateCollection as any, currentBlock);
+        }
     }
 }
 
@@ -156,5 +164,8 @@ async function determineStartBlock(chainStateCollection: Collection<Document> | 
     return START_BLOCK_HEIGHT
 }
 
+function sleep(ms : number) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
 
 export { CONTRACTS_TO_TRACK };
