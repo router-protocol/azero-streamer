@@ -1,0 +1,17 @@
+version: '3.3'
+services:
+  streamer:
+    image: nitro/azero-streamer
+    env_file:
+      - .env
+    ports:
+      - '6901:6901'
+    depends_on:
+      - mongodb
+  mongodb:
+    image: mongo:6-jammy
+    command: mongod --port 27018
+    ports:
+      - '27018:27018'
+    volumes:
+      - ./db-alpha:/data/db:rw
