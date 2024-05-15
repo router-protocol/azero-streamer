@@ -4,9 +4,12 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "start": "node ./dist/app.js --exec babel-node -e js",
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "rm -rf ./dist/ && tsc",
-    "build-and-start": "npm run build && npm start"
+    "build-and-start": "npm run build && npm start",
+    "dev": "nodemon ./src/app.ts",
+    "codegen": "graphql-codegen --config codegen.ts"
   },
   "keywords": [],
   "author": "",
@@ -16,6 +19,7 @@
     "@types/express": "^4.17.21",
     "@types/mongodb": "^4.0.7",
     "@types/node": "^20.11.6",
+    "nodemon": "^2.0.22",
     "ts-node": "^10.9.2",
     "typescript": "^5.3.3"
   },
@@ -29,6 +33,7 @@
     "dotenv": "^16.4.1",
     "express": "^4.18.2",
     "mongodb": "^6.3.0",
+    "node": "^20.13.1",
     "winston": "^3.11.0"
   }
 }

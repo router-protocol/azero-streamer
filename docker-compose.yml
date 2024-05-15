@@ -1,13 +1,15 @@
 version: '3.3'
 services:
   streamer:
-    image: nitro/azero-streamer
+    image: azero-streamer
     env_file:
       - .env
     ports:
       - '6901:6901'
     depends_on:
       - mongodb
+    environment:
+      - MONGO_DB_URI=${MONGO_DB_URI}
   mongodb:
     image: mongo:6-jammy
     command: mongod --port 27018
