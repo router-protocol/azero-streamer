@@ -23,7 +23,7 @@ interface EventData {
 export async function initialize() {
 
     await initializeMongoDB();
-    debugger
+
     const api = await ApiPromise.create({ provider: new WsProvider(config.AZERO_NODE_WS_URL) });
 
     const network = getNetwork(config.ChainId);
@@ -106,20 +106,20 @@ async function processBlockEvents(api: ApiPromise, gateway: Gateway, assetForwar
             events.forEach((record) => {
                 const { event } = record;
                 if (event.method === "ContractEmitted") {
+
                     const contractAddress = event.data[0].toString();
                     const txHash = extrinsic.hash.toHex();
+            
                     if (contractAddress == gateway.address){
                         
                         logger.info(`Event fetched from Gateway contract : ${contractAddress}`);                        
-                        processEvent(contractAddress,event, blockNumber, txHash, timestamp); 
+                        processEvent(gateway,event, blockNumber, txHash, timestamp); 
                     
                     } else if (contractAddress == assetForwarder.address) {
                         
                         logger.info(`Event fetched from AssetForwarder contract : ${contractAddress}`);              
-                        processEvent(contractAddress,event, blockNumber, txHash, timestamp); 
+                        processEvent(assetForwarder,event, blockNumber, txHash, timestamp); 
                     
-                    } else {
-                        logger.info(`Not relevant event`);
                     }
                 }
             });
@@ -129,9 +129,9 @@ async function processBlockEvents(api: ApiPromise, gateway: Gateway, assetForwar
     }
 }
 
-async function processEvent(contractAddress : any,event: Event, blockNumber: number, txHash: string, timestamp: any) {
+async function processEvent(contract : any,event: Event, blockNumber: number, txHash: string, timestamp: any) {
    
-    const decodedEvent = contractAddress.abi.decodeEvent(Uint8Array.from(Buffer.from(event.data[1].toHex().slice(2), "hex")));
+    const decodedEvent = contract.abi.decodeEvent(Uint8Array.from(Buffer.from(event.data[1].toHex().slice(2), "hex")));
     const formattedEvent: EventData = formatEvent(decodedEvent);
     logger.info(`Contract Event at Block ${blockNumber}: ${decodedEvent.event.identifier}`);
     logger.info(`Transaction Hash: ${txHash}`);
@@ -139,7 +139,7 @@ async function processEvent(contractAddress : any,event: Event, blockNumber: num
     logger.info(`Event Data: ${JSON.stringify(formattedEvent, null, 2)}`);
    
 
-    await saveEventToDatabase(contractAddress, blockNumber, decodedEvent.event.identifier, formattedEvent, txHash, timestamp);
+    await saveEventToDatabase(contract.address, blockNumber, decodedEvent.event.identifier, formattedEvent, txHash, timestamp);
 }
 
 function formatEvent(decodedEvent: DecodedEvent) {
