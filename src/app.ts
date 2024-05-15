@@ -2,7 +2,7 @@ import express, { Request, Response } from 'express';
 import cors from 'cors';
 import path from 'path';
 import logger from './logger';
-import { startStreamService } from './streamer';
+import { startStreamerService } from './streamer';
 import { initializeMongoDB } from './db/mongoDB';
 import { healthCheck } from './routes/healthCheck';
 import { fetchLogs } from './routes/getLogs';
@@ -24,7 +24,7 @@ async function main() {
     try {
         await initializeMongoDB();
         app.listen(PORT, () => logger.info(`Server running on http://localhost:${PORT}`));
-        startStreamService();
+        startStreamerService();
     } catch (error) {
         logger.error(`Error occurred: ${error}`);
     }

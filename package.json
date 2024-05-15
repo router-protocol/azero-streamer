@@ -20,8 +20,11 @@
     "typescript": "^5.3.3"
   },
   "dependencies": {
+    "@727-ventures/typechain-compiler": "^0.5.16",
+    "@727-ventures/typechain-types": "^0.0.22",
     "@polkadot/api": "^9.14.2",
     "@polkadot/api-contract": "^9.14.2",
+    "@routerprotocol/router-chain-sdk-ts": "^0.8.66-beta-2.0",
     "cors": "^2.8.5",
     "dotenv": "^16.4.1",
     "express": "^4.18.2",

@@ -1,31 +1,87 @@
 import { ApiPromise, WsProvider } from '@polkadot/api';
 import { Event, EventRecord } from '@polkadot/types/interfaces';
 import logger from './logger';
-import { Abi } from '@polkadot/api-contract';
-import fs from 'fs';
 import { BN } from '@polkadot/util';
+import Keyring from "@polkadot/keyring";
 import { updateLastUpdatedBlock, getLastSyncedBlock } from './db/mongoDB/action/chainState';
 import { getCollection, initializeMongoDB } from './db/mongoDB';
-import { CONTRACTS_TO_TRACK, EVENTS_TO_TRACK, AZERO_NODE_WS_URL, START_BLOCK_HEIGHT, END_BLOCK_HEIGHT, CONTRACTS_TO_ABI_PATHS } from './config';
 import { DecodedEvent } from '@polkadot/api-contract/types';
 import { Codec } from '@polkadot/types-codec/types';
 import { Collection, Document } from 'mongodb';
+import { ChainGrpcMultiChainApi, getEndpointsForNetwork, getNetworkType } from '@routerprotocol/router-chain-sdk-ts';
+import config from './config.json';
+import Gateway from "./types/contracts/gateway_contract";
+import AssetForwarder from "./forwarder-types/contracts/asset_forwarder";
+import { getNetwork } from "./chain.config";
+import { debug } from 'console';
 
-interface ContractAbis {
-    [address: string]: Abi;
-}
 
 interface EventData {
     [key: string]: string | number | boolean;
 }
 
+export async function initialize() {
 
-const contractAbis: ContractAbis = {};
-Object.keys(CONTRACTS_TO_ABI_PATHS).forEach((address) => {
-    contractAbis[address] = new Abi(JSON.parse(fs.readFileSync(CONTRACTS_TO_ABI_PATHS[address], 'utf8')));
-});
+    await initializeMongoDB();
+    debugger
+    const api = await ApiPromise.create({ provider: new WsProvider(config.AZERO_NODE_WS_URL) });
 
-async function processBlockEvents(api: ApiPromise, blockNumber: number) {
+    const network = getNetwork(config.ChainId);
+
+    const keyring = new Keyring({ type: network.type });
+    
+    const deployer = keyring.addFromMnemonic(process.env.MNEMONIC);
+    
+    const EXPLORER_ENVIRONMENT: string = config.EXPLORER_ENVIRONMENT;
+    
+    const endpoint = getEndpointsForNetwork(getNetworkType(EXPLORER_ENVIRONMENT.toLowerCase())).grpcEndpoint;
+    
+    const multiClientClient = new ChainGrpcMultiChainApi(endpoint);
+    
+    const contractConfigs = await multiClientClient.fetchAllContractConfig();
+    
+    const gatewayConfig = contractConfigs.contractconfigList.find(e => e.chainid == config.ChainId && e.contracttype == 0 && e.contractEnabled);
+    
+    if (!gatewayConfig) throw new Error('Gateway contract configuration not fetched from chain.');
+    
+    const ss5588Gateway = api.registry.createType("AccountId", gatewayConfig.contractaddress).toString();
+    
+    const gateway = new Gateway(ss5588Gateway, deployer, api);
+
+    const assetForwarderConfig = contractConfigs.contractconfigList.find(e => e.chainid == config.ChainId && e.contracttype == 1 && e.contractEnabled);
+
+    if (!assetForwarderConfig) throw new Error('assetForwarder contract configuration not fetched from chain.');
+    
+    const ss5588AssetForwarder = api.registry.createType("AccountId", assetForwarderConfig.contractaddress).toString();
+    
+    const assetForwarder = new AssetForwarder(ss5588AssetForwarder, deployer, api);
+    
+    const chainStateCollection = await getCollection('chainState');
+    
+    let currentBlock = await determineStartBlock(chainStateCollection as any);
+
+    while (true) {
+        const latestBlockHash = await api.rpc.chain.getFinalizedHead();
+        const latestBlock = await api.rpc.chain.getBlock(latestBlockHash);
+        const latestBlockNumber = latestBlock.block.header.number.toNumber();
+
+        if (currentBlock > latestBlockNumber) {
+            logger.info(`Current block number ${currentBlock} is greater than latest block number ${latestBlockNumber}. Restarting streamer service...`);
+            startStreamerService();  // Restart the streamer service
+            return;
+        }
+
+        logger.info(`Starting streaming service from block ${currentBlock}`);
+        while (currentBlock <= latestBlockNumber) {
+            await processBlockEvents(api,gateway,assetForwarder,currentBlock);
+            currentBlock++; // Move to the next block
+            await updateLastUpdatedBlock(chainStateCollection as any, currentBlock);
+        }
+    }
+}
+
+
+async function processBlockEvents(api: ApiPromise, gateway: Gateway, assetForwarder: AssetForwarder ,blockNumber: number) {
     try {
         const blockHash = await api.rpc.chain.getBlockHash(blockNumber);
         const signedBlock = await api.rpc.chain.getBlock(blockHash);
@@ -39,7 +95,7 @@ async function processBlockEvents(api: ApiPromise, blockNumber: number) {
 
         // Convert to UNIX timestamp in seconds
         const timestamp = Number((Number(timestampMillis) / 1000).toFixed(0));
-        
+
         // Iterate through each extrinsic in the block
         signedBlock.block.extrinsics.forEach((extrinsic, index) => {
             // Extrinsics may have multiple associated events, filter relevant events
@@ -49,10 +105,22 @@ async function processBlockEvents(api: ApiPromise, blockNumber: number) {
 
             events.forEach((record) => {
                 const { event } = record;
-                if (event.method === "ContractEmitted" && CONTRACTS_TO_TRACK.includes(event.data[0].toString())) {
-                    // Include the transaction hash (extrinsic hash) in the event processing  
+                if (event.method === "ContractEmitted") {
+                    const contractAddress = event.data[0].toString();
                     const txHash = extrinsic.hash.toHex();
-                    processEvent(event, blockNumber, txHash, timestamp); // Updated to pass timestamp
+                    if (contractAddress == gateway.address){
+                        
+                        logger.info(`Event fetched from Gateway contract : ${contractAddress}`);                        
+                        processEvent(contractAddress,event, blockNumber, txHash, timestamp); 
+                    
+                    } else if (contractAddress == assetForwarder.address) {
+                        
+                        logger.info(`Event fetched from AssetForwarder contract : ${contractAddress}`);              
+                        processEvent(contractAddress,event, blockNumber, txHash, timestamp); 
+                    
+                    } else {
+                        logger.info(`Not relevant event`);
+                    }
                 }
             });
         });
@@ -61,16 +129,9 @@ async function processBlockEvents(api: ApiPromise, blockNumber: number) {
     }
 }
 
-async function processEvent(event: Event, blockNumber: number, txHash: string, timestamp: any) {
-    const contractAddress = event.data[0].toString();
-    const abi = contractAbis[contractAddress];
-
-    if (!abi) {
-        logger.error(`ABI not found for contract address: ${contractAddress}`);
-        return;
-    }
-
-    const decodedEvent = abi.decodeEvent(Uint8Array.from(Buffer.from(event.data[1].toHex().slice(2), "hex")));
+async function processEvent(contractAddress : any,event: Event, blockNumber: number, txHash: string, timestamp: any) {
+   
+    const decodedEvent = contractAddress.abi.decodeEvent(Uint8Array.from(Buffer.from(event.data[1].toHex().slice(2), "hex")));
     const formattedEvent: EventData = formatEvent(decodedEvent);
     logger.info(`Contract Event at Block ${blockNumber}: ${decodedEvent.event.identifier}`);
     logger.info(`Transaction Hash: ${txHash}`);
@@ -131,41 +192,23 @@ async function saveEventToDatabase(contractAddress: string, blockNumber: number,
     }
 }
 
-export async function startStreamService() {
-    await initializeMongoDB();
-    const api = await ApiPromise.create({ provider: new WsProvider(AZERO_NODE_WS_URL) });
-
-    const chainStateCollection = await getCollection('chainState');
-    let currentBlock = await determineStartBlock(chainStateCollection as any);
-    while (true) {
-        const latestBlockHash = await api.rpc.chain.getFinalizedHead();
-        const latestBlock = await api.rpc.chain.getBlock(latestBlockHash);
-        const latestBlockNumber = latestBlock.block.header.number.toNumber();
-
-        if (currentBlock > latestBlockNumber) {
-            logger.info(`Current block number ${currentBlock} is greater than latest block number ${latestBlockNumber}. Waiting to recheck...`);
-            await sleep(30000);  // Wait for 30 seconds before checking again
-            continue;  // Continue to the next iteration of the loop
-        }
-
-        logger.info(`Starting streaming service from block ${currentBlock}`);
-        while (currentBlock <= latestBlockNumber) {
-            await processBlockEvents(api, currentBlock);
-            currentBlock++; // Move to the next block
-            await updateLastUpdatedBlock(chainStateCollection as any, currentBlock);
-        }
-    }
-}
-
 async function determineStartBlock(chainStateCollection: Collection<Document> | Collection<Document> | undefined) {
     const lastSyncedBlock = await getLastSyncedBlock(chainStateCollection as any);
     console.log("lastSyncedBlock : ", lastSyncedBlock)
-    //return lastSyncedBlock > 0 ? lastSyncedBlock : START_BLOCK_HEIGHT;
-    return START_BLOCK_HEIGHT
+    return lastSyncedBlock > 0 ? lastSyncedBlock : config.START_BLOCK_HEIGHT;
+    //return START_BLOCK_HEIGHT
 }
 
-function sleep(ms : number) {
-    return new Promise(resolve => setTimeout(resolve, ms));
+export async function startStreamerService() {
+    try {
+      logger.info("Initializing Streamer");
+        
+      await initialize();
+      
+    } catch (error) {
+  
+      logger.error(`Failed to start listener service: ${error.message} -> Retrying after a delay...`);
+      setTimeout(startStreamerService, 5000);  
+  
+    }
 }
-
-export { CONTRACTS_TO_TRACK };
