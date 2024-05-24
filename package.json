@@ -24,16 +24,26 @@
     "typescript": "^5.3.3"
   },
   "dependencies": {
-    "@727-ventures/typechain-compiler": "^0.5.16",
-    "@727-ventures/typechain-types": "^0.0.22",
-    "@polkadot/api": "^9.14.2",
-    "@polkadot/api-contract": "^9.14.2",
-    "@routerprotocol/router-chain-sdk-ts": "^0.8.66-beta-2.0",
+    "@dpowxconsensus/typechain-compiler": "^1.1.6",
+    "@dpowxconsensus/typechain-polkadot": "^1.1.6",
+    "@dpowxconsensus/typechain-types": "^1.2.6",
+    "@polkadot/api": "^11.1.1",
+    "@polkadot/api-contract": "^11.1.1",
+    "@polkadot/types-codec": "^11.1.1",
+    "@routerprotocol/router-chain-sdk-ts": "0.8.67",
     "cors": "^2.8.5",
     "dotenv": "^16.4.1",
+    "ethers": "6.11.1",
     "express": "^4.18.2",
     "mongodb": "^6.3.0",
     "node": "^20.13.1",
     "winston": "^3.11.0"
+  },
+  "resolutions": {
+    "@polkadot/api": "11.1.1",
+    "@polkadot/api-contract": "11.1.1",
+    "@polkadot/api-derive": "11.1.1",
+    "@polkadot/api-base": "11.1.1",
+    "@polkadot/api-augment": "11.1.1"
   }
 }
