@@ -198,8 +198,8 @@ async function saveEventToDatabase(contractAddress: string, blockNumber: number,
 async function determineStartBlock(chainStateCollection: Collection<Document> | Collection<Document> | undefined) {
     const lastSyncedBlock = await getLastSyncedBlock(chainStateCollection as any);
     console.log("lastSyncedBlock : ", lastSyncedBlock)
-    //return lastSyncedBlock > 0 ? lastSyncedBlock : config.START_BLOCK_HEIGHT;
-    return config.START_BLOCK_HEIGHT
+    return lastSyncedBlock > 0 ? lastSyncedBlock : config.START_BLOCK_HEIGHT;
+    //return config.START_BLOCK_HEIGHT
 }
 
 export async function startStreamerService() {
