@@ -6,5 +6,3 @@ dist
 db-alpha
 .aws/credentials
 config.json
-types
-forwarder-types
