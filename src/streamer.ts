@@ -73,6 +73,7 @@ export async function initialize() {
         logger.info(`Starting streaming service from block ${currentBlock}`);
         while (currentBlock <= latestBlockNumber) {
             await processBlockEvents(api,gateway,assetForwarder,currentBlock);
+            logger.info(`Moving to next block : ${currentBlock+1}`);
             currentBlock++; // Move to the next block
             await updateLastUpdatedBlock(chainStateCollection as any, currentBlock);
         }
@@ -82,6 +83,7 @@ export async function initialize() {
 
 async function processBlockEvents(api: ApiPromise, gateway: Gateway, assetForwarder: AssetForwarder ,blockNumber: number) {
     try {
+        logger.info(`Processing block : ${blockNumber}`);
         const blockHash = await api.rpc.chain.getBlockHash(blockNumber);
         const signedBlock = await api.rpc.chain.getBlock(blockHash);
         const allEvents = await api.query.system.events.at(blockHash) as EventRecord[];
