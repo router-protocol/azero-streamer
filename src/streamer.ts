@@ -1,3 +1,4 @@
+import * as path from 'path';
 import { ApiPromise, WsProvider } from '@polkadot/api';
 import { EventRecord } from '@polkadot/types/interfaces';
 import logger from './logger';
@@ -9,10 +10,11 @@ import { DecodedEvent } from '@polkadot/api-contract/types';
 import { Codec } from '@polkadot/types-codec/types';
 import { Collection, Document } from 'mongodb';
 import { ChainGrpcMultiChainApi, getEndpointsForNetwork, getNetworkType } from '@routerprotocol/router-chain-sdk-ts';
-import config from './config.json';
 import Gateway from "./types/contracts/gateway_contract";
 import AssetForwarder from "./forwarder-types/contracts/asset_forwarder";
-import { getNetwork } from "./chain.config";
+import { getNetwork } from "./constant/index"
+require("dotenv").config({ path: path.resolve(__dirname, '../.env') });
+
 
 
 interface EventData {
@@ -23,15 +25,17 @@ export async function initialize() {
 
     await initializeMongoDB();
 
-    const api = await ApiPromise.create({ provider: new WsProvider(config.AZERO_NODE_WS_URL) });
+    const network = getNetwork(process.env.CHAIN_ID);
 
-    const network = getNetwork(config.ChainId);
+    logger.info(`Streamer Service Running on : ${network.name}`);
 
     const keyring = new Keyring({ type: network.type });
     
     const deployer = keyring.addFromMnemonic(process.env.MNEMONIC);
-    
-    const EXPLORER_ENVIRONMENT: string = config.EXPLORER_ENVIRONMENT;
+
+    const api = await ApiPromise.create({ provider: new WsProvider(network.nodeWSUrl)});
+
+    const EXPLORER_ENVIRONMENT: string = process.env.EXPLORER_ENVIRONMENT;
     
     const endpoint = getEndpointsForNetwork(getNetworkType(EXPLORER_ENVIRONMENT.toLowerCase())).grpcEndpoint;
     
@@ -39,7 +43,7 @@ export async function initialize() {
     
     const contractConfigs = await multiClientClient.fetchAllContractConfig();
     
-    const gatewayConfig = contractConfigs.contractconfigList.find(e => e.chainid == config.ChainId && e.contracttype == 0 && e.contractEnabled);
+    const gatewayConfig = contractConfigs.contractconfigList.find(e => e.chainid == network.id && e.contracttype == 0 && e.contractEnabled);
     
     if (!gatewayConfig) throw new Error('Gateway contract configuration not fetched from chain.');
     
@@ -47,7 +51,7 @@ export async function initialize() {
     
     const gateway = new Gateway(ss5588Gateway, deployer, api);
 
-    const assetForwarderConfig = contractConfigs.contractconfigList.find(e => e.chainid == config.ChainId && e.contracttype == 1 && e.contractEnabled);
+    const assetForwarderConfig = contractConfigs.contractconfigList.find(e => e.chainid == network.id && e.contracttype == 1 && e.contractEnabled);
 
     if (!assetForwarderConfig) throw new Error('assetForwarder contract configuration not fetched from chain.');
     
@@ -57,7 +61,7 @@ export async function initialize() {
     
     const chainStateCollection = await getCollection('chainState');
     
-    let currentBlock = await determineStartBlock(chainStateCollection as any);
+    let currentBlock = await determineStartBlock(chainStateCollection as any, network.startBlock ? network.startBlock : undefined);
 
     while (true) {
         const latestBlockHash = await api.rpc.chain.getFinalizedHead();
@@ -197,12 +201,13 @@ async function saveEventToDatabase(contractAddress: string, blockNumber: number,
     }
 }
 
-async function determineStartBlock(chainStateCollection: Collection<Document> | Collection<Document> | undefined) {
+
+async function determineStartBlock(chainStateCollection: Collection<Document> | Collection<Document> | undefined, startBlockFromConfig?: number) {
     const lastSyncedBlock = await getLastSyncedBlock(chainStateCollection as any);
-    console.log("lastSyncedBlock : ", lastSyncedBlock)
-    return lastSyncedBlock > 0 ? lastSyncedBlock : config.START_BLOCK_HEIGHT;
-    //return config.START_BLOCK_HEIGHT
+    console.log("lastSyncedBlock:", lastSyncedBlock);
+    return startBlockFromConfig !== undefined ? startBlockFromConfig : lastSyncedBlock;
 }
+
 
 export async function startStreamerService() {
     try {
