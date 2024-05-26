@@ -3,9 +3,11 @@ import cors from 'cors';
 import path from 'path';
 import logger from './logger';
 import { startStreamerService } from './streamer';
-import { initializeMongoDB } from './db/mongoDB';
+import { DBInstance, initializeMongoDB } from './db/mongoDB';
 import { healthCheck } from './routes/healthCheck';
 import { fetchLogs } from './routes/getLogs';
+import { healthCheckService } from './utils/healthCheckService';
+import { ALERTER_ACTIVE } from './constant';
 require("dotenv").config({ path: path.resolve(__dirname, '../.env') });
 
 const app = express();
@@ -31,3 +33,17 @@ async function main() {
 }
 
 main();
+let continousAlerts = 1;
+if (ALERTER_ACTIVE) {
+    setInterval(async () => {
+        // do health check every 5 minutes
+        if (!DBInstance) {
+            const alerted = await healthCheckService();
+            if (alerted) {
+                continousAlerts++;
+            } else {
+                continousAlerts = 1;
+            }
+        }
+    }, continousAlerts * 5 * 60 * 1000);
+}
