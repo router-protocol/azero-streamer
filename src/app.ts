@@ -11,7 +11,7 @@ import { ALERTER_ACTIVE } from './constant';
 require("dotenv").config({ path: path.resolve(__dirname, '../.env') });
 
 const app = express();
-const PORT = process.env.PORT || 6900;
+const PORT = Number(process.env.PORT) || 6900;
 
 app.use(cors());
 
@@ -25,7 +25,7 @@ app.use('/', fetchLogs); // Fetch logs route
 async function main() {
     try {
         await initializeMongoDB();
-        app.listen(PORT, () => logger.info(`Server running on http://localhost:${PORT}`));
+        app.listen(PORT, '0.0.0.0', () => logger.info(`Server running on http://0.0.0.0:${PORT}`)); // Bind to 0.0.0.0
         startStreamerService();
     } catch (error) {
         logger.error(`Error occurred: ${error}`);
