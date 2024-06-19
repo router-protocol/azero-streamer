@@ -27,22 +27,21 @@
     "@dpowxconsensus/typechain-compiler": "^1.1.6",
     "@dpowxconsensus/typechain-polkadot": "^1.1.6",
     "@dpowxconsensus/typechain-types": "^1.2.6",
+    "@ledgerhq/hw-transport-webhid": "^6.0.0",
+    "@ledgerhq/hw-transport-webusb": "^6.0.0",
+    "@metamask/eth-sig-util": "^4.0.0",
     "@polkadot/api": "10.13.1",
     "@polkadot/api-contract": "10.13.1",
     "@polkadot/types-codec": "10.13.1",
     "@routerprotocol/router-chain-sdk-ts": "0.8.67",
+    "axios": "^1.7.2",
     "cors": "^2.8.5",
     "dotenv": "^16.4.1",
     "ethers": "6.11.1",
     "express": "^4.18.2",
     "mongodb": "^6.3.0",
     "node": "^20.13.1",
-    "winston": "^3.11.0",  
-    "@metamask/eth-sig-util": "^4.0.0", 
-    "@ledgerhq/hw-transport-webusb": "^6.0.0", 
-    "@ledgerhq/hw-transport-webhid": "^6.0.0",  
-    "axios": "^0.27.2"
+    "winston": "^3.11.0"
   },
-  "resolutions": {
-  }
+  "resolutions": {}
 }

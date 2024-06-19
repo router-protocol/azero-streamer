@@ -8,6 +8,7 @@ type Chain = {
   id: string;
   name: string;
   nodeWSUrl: string;
+  configServiceUrl: string;
   startBlock: number;
 };
 
@@ -16,6 +17,7 @@ export const AlephZeroTestnet: Chain = {
   name: "Aleph Zero Testnet",
   type: "sr25519", // or ed25519 :  *25519
   nodeWSUrl: process.env.AZERO_NODE_WS_URL,
+  configServiceUrl: process.env.CONFIG_SERVICE_URL,
   startBlock: Number(process.env.START_BLOCK),
 };
 
@@ -24,6 +26,7 @@ export const AlephZeroMainnet: Chain = {
   name: "Aleph Zero Mainnet",
   type: "sr25519", // or ed25519 :  *25519
   nodeWSUrl: process.env.AZERO_NODE_WS_URL,
+  configServiceUrl: process.env.CONFIG_SERVICE_URL,
   startBlock: Number(process.env.START_BLOCK),
 };
 

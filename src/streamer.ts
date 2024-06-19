@@ -12,7 +12,9 @@ import { Collection, Document } from 'mongodb';
 import { ChainGrpcMultiChainApi, getEndpointsForNetwork, getNetworkType } from '@routerprotocol/router-chain-sdk-ts';
 import Gateway from "./types/contracts/gateway_contract";
 import AssetForwarder from "./forwarder-types/contracts/asset_forwarder";
+import AssetBridge from "./asset-bridge-types/contracts/asset_bridge";
 import { getNetwork } from "./constant/index"
+import axios from 'axios';
 require("dotenv").config({ path: path.resolve(__dirname, '../.env') });
 
 
@@ -58,6 +60,18 @@ export async function initialize() {
     const ss5588AssetForwarder = api.registry.createType("AccountId", assetForwarderConfig.contractaddress).toString();
     
     const assetForwarder = new AssetForwarder(ss5588AssetForwarder, deployer, api);
+
+    // Fetch aleph-testnet mintBurnBridge
+    const mintBurnBridge = await fetchMintBurnBridge(network.configServiceUrl);
+    if (mintBurnBridge) {
+        console.log(`aleph-testnet mintBurnBridge: ${mintBurnBridge}`);
+    } else {
+        console.log('mintBurnBridge not found');
+    }
+
+    const ss5588MintBurnBridge = api.registry.createType("AccountId",mintBurnBridge).toString();
+
+    const assetBridge = new AssetBridge(ss5588MintBurnBridge, deployer, api);
     
     const chainStateCollection = await getCollection('chainState');
     
@@ -76,8 +90,7 @@ export async function initialize() {
 
         logger.info(`Starting streaming service from block ${currentBlock}`);
         while (currentBlock <= latestBlockNumber) {
-            await processBlockEvents(api,gateway,assetForwarder,currentBlock);
-            logger.info(`Moving to next block : ${currentBlock+1}`);
+            await processBlockEvents(api,gateway,assetForwarder,assetBridge,currentBlock);
             currentBlock++; // Move to the next block
             await updateLastUpdatedBlock(chainStateCollection as any, currentBlock);
         }
@@ -85,9 +98,33 @@ export async function initialize() {
 }
 
 
-async function processBlockEvents(api: ApiPromise, gateway: Gateway, assetForwarder: AssetForwarder ,blockNumber: number) {
+// Function to fetch mintBurnBridge for aleph-testnet
+async function fetchMintBurnBridge(url:string): Promise<string | undefined> {
+    
     try {
-        logger.info(`Processing block : ${blockNumber}`);
+        
+        const response = await axios.get(url, {
+            headers: {
+              'Content-Type': 'application/json'
+            }
+          });
+      
+          const data = response.data;
+          const alephTestnetData = data['aleph-testnet'];
+      
+          if (alephTestnetData) {
+            return alephTestnetData.mintBurnBridge;
+          } else {
+            throw new Error('aleph-testnet data not found');
+          }
+        } catch (error) {
+          console.error('Error fetching data:', error);
+          return undefined;
+    }
+  }
+
+async function processBlockEvents(api: ApiPromise, gateway: Gateway, assetForwarder: AssetForwarder, assetBridge : AssetBridge ,blockNumber: number) {
+    try {
         const blockHash = await api.rpc.chain.getBlockHash(blockNumber);
         const signedBlock = await api.rpc.chain.getBlock(blockHash);
         const allEvents = await api.query.system.events.at(blockHash) as EventRecord[];
@@ -125,6 +162,10 @@ async function processBlockEvents(api: ApiPromise, gateway: Gateway, assetForwar
                         logger.info(`Event fetched from AssetForwarder contract : ${contractAddress}`);              
                         processEvent(assetForwarder,record, blockNumber, txHash, timestamp); 
                     
+                    } else if  (contractAddress == assetBridge.address) {
+                
+                        logger.info(`Event fetched from AssetBridge contract : ${contractAddress}`);              
+                        processEvent(assetBridge,record, blockNumber, txHash, timestamp); 
                     }
                 }
             });
