@@ -33,7 +33,7 @@
     "@polkadot/api": "10.13.1",
     "@polkadot/api-contract": "10.13.1",
     "@polkadot/types-codec": "10.13.1",
-    "@routerprotocol/router-chain-sdk-ts": "0.8.67",
+    "@routerprotocol/router-chain-sdk-ts":  "0.8.69-beta-0.8",
     "axios": "^1.7.2",
     "cors": "^2.8.5",
     "dotenv": "^16.4.1",
