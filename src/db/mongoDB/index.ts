@@ -3,7 +3,7 @@ import { MONGO_DB_URI } from '../../constant'; // Ensure this is the correct pat
 import logger from '../../logger'; // Update the import path according to your project structure
 
 // Database Name for Azero data
-const dbName = 'azero-streamer';
+const dbName = 'azero-streamer-testnet';
 
 export let DBInstance: Db;
 
