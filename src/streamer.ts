@@ -5,7 +5,7 @@ import logger from './logger';
 import { BN } from '@polkadot/util';
 import Keyring from "@polkadot/keyring";
 import { updateLastUpdatedBlock, getLastSyncedBlock } from './db/mongoDB/action/chainState';
-import { getCollection, initializeMongoDB } from './db/mongoDB';
+import { getCollection, initializeMongoDB, closeMongoDBConnection } from './db/mongoDB'; 
 import { DecodedEvent } from '@polkadot/api-contract/types';
 import { Codec } from '@polkadot/types-codec/types';
 import { Collection, Document } from 'mongodb';
@@ -44,7 +44,7 @@ export async function initialize() {
     const EXPLORER_ENVIRONMENT: string = process.env.EXPLORER_ENVIRONMENT;
     const endpoint = getEndpointsForNetwork(getNetworkType(EXPLORER_ENVIRONMENT.toLowerCase())).grpcEndpoint;
 
-    logger.info('Creating multi-client instance',endpoint);
+    logger.info('Creating multi-client instance', endpoint);
     const multiClientClient = new ChainGrpcMultiChainApi(endpoint);
     const contractConfigs = await multiClientClient.fetchAllContractConfig();
 
@@ -70,7 +70,6 @@ export async function initialize() {
     const chainStateCollection = await getCollection('chainState');
 
     while (true) {
-
         let currentBlock = await determineStartBlock(chainStateCollection as any, network.startBlock ? network.startBlock : undefined);
         logger.info('Fetching latest block hash');
         const latestBlockHash = await api.rpc.chain.getFinalizedHead();
@@ -79,17 +78,16 @@ export async function initialize() {
 
         if (currentBlock >= latestBlockNumber) {
             logger.info(`Current block number ${currentBlock} is >= latest block number ${latestBlockNumber}. Restarting streamer service...`);
+            await closeMongoDBConnection()
             setTimeout(startStreamerService, 10000);  
             return;
         }
 
         logger.info(`Starting streaming service from block ${currentBlock}`);
         
-        await processBlocksInChunks(api,chainStateCollection, gateway, assetForwarder, assetBridge, currentBlock, latestBlockNumber, 1000);
-    
+        await processBlocksInChunks(api, chainStateCollection, gateway, assetForwarder, assetBridge, currentBlock, latestBlockNumber, 1000);
     }
 }
-
 
 async function fetchMintBurnBridge(url: string): Promise<string | undefined> {
     logger.info(`Fetching mintBurnBridge from URL: ${url}`);
@@ -106,8 +104,7 @@ async function fetchMintBurnBridge(url: string): Promise<string | undefined> {
     }
 }
 
-async function processBlocksInChunks(api: ApiPromise,chainStateCollection, gateway: Gateway, assetForwarder: AssetForwarder, assetBridge: AssetBridge, startBlock: number, endBlock: number, defaultChunkSize: number) {
-    
+async function processBlocksInChunks(api: ApiPromise, chainStateCollection: Collection<Document>, gateway: Gateway, assetForwarder: AssetForwarder, assetBridge: AssetBridge, startBlock: number, endBlock: number, defaultChunkSize: number) {
     const totalBlocks = endBlock - startBlock + 1;
     const optimalChunkSize = Math.min(totalBlocks, defaultChunkSize);
 
@@ -125,7 +122,6 @@ async function processBlocksInChunks(api: ApiPromise,chainStateCollection, gatew
     }
 }
 
-
 async function processBlocksInParallel(api: ApiPromise, gateway: Gateway, assetForwarder: AssetForwarder, assetBridge: AssetBridge, startBlock: number, endBlock: number) {
     logger.info(`Processing blocks from ${startBlock} to ${endBlock} in parallel`);
     const blockNumbers = Array.from({ length: endBlock - startBlock + 1 }, (_, i) => startBlock + i);
@@ -133,7 +129,6 @@ async function processBlocksInParallel(api: ApiPromise, gateway: Gateway, assetF
 }
 
 async function processBlockEvents(api: ApiPromise, gateway: Gateway, assetForwarder: AssetForwarder, assetBridge: AssetBridge, blockNumber: number) {
-
     try {
         const blockHash = await api.rpc.chain.getBlockHash(blockNumber);
         const signedBlock = await api.rpc.chain.getBlock(blockHash);
@@ -143,36 +138,37 @@ async function processBlockEvents(api: ApiPromise, gateway: Gateway, assetForwar
         const timestampMillis = (timestampCodec as any).toBigInt();
         const timestamp = Number((Number(timestampMillis) / 1000).toFixed(0));
 
+        const eventsToSave: any[] = [];
         const eventPromises = signedBlock.block.extrinsics.map((extrinsic, index) => {
             const events = allEvents.filter(({ phase }) => phase.isApplyExtrinsic && phase.asApplyExtrinsic.eq(index));
-            return Promise.all(events.map(record => processEventIfContract(api, gateway, assetForwarder, assetBridge, record, extrinsic.hash.toHex(), timestamp, blockNumber)));
+            return Promise.all(events.map(record => processEventIfContract(api, gateway, assetForwarder, assetBridge, record, extrinsic.hash.toHex(), timestamp, blockNumber, eventsToSave)));
         });
 
         await Promise.all(eventPromises);
+        await saveEventsToDatabase(eventsToSave);
     } catch (error) {
         logger.error(`Error processing block ${blockNumber}: ${error}`);
     }
 }
 
-async function processEventIfContract(api: ApiPromise, gateway: Gateway, assetForwarder: AssetForwarder, assetBridge: AssetBridge, record: EventRecord, txHash: string, timestamp: number, blockNumber: number) {
+async function processEventIfContract(api: ApiPromise, gateway: Gateway, assetForwarder: AssetForwarder, assetBridge: AssetBridge, record: EventRecord, txHash: string, timestamp: number, blockNumber: number, eventsToSave: any[]) {
     const { event } = record;
     if (event.method === "ContractEmitted") {
         const contractAddress = event.data[0].toString();
         if (contractAddress === gateway.address) {
             logger.info(`Event fetched from Gateway contract : ${contractAddress}`);
-            await processEvent(gateway, record, blockNumber, txHash, timestamp);
+            await processEvent(gateway, record, blockNumber, txHash, timestamp, eventsToSave);
         } else if (contractAddress === assetForwarder.address) {
             logger.info(`Event fetched from AssetForwarder contract : ${contractAddress}`);
-            await processEvent(assetForwarder, record, blockNumber, txHash, timestamp);
+            await processEvent(assetForwarder, record, blockNumber, txHash, timestamp, eventsToSave);
         } else if (contractAddress === assetBridge.address) {
             logger.info(`Event fetched from AssetBridge contract : ${contractAddress}`);
-            await processEvent(assetBridge, record, blockNumber, txHash, timestamp);
+            await processEvent(assetBridge, record, blockNumber, txHash, timestamp, eventsToSave);
         }
     }
 }
 
-async function processEvent(contract: any, record: EventRecord, blockNumber: number, txHash: string, timestamp: number) {
-
+async function processEvent(contract: any, record: EventRecord, blockNumber: number, txHash: string, timestamp: number, eventsToSave: any[]) {
     logger.info(`Processing event for contract ${contract.address} at block ${blockNumber}`);
 
     try {
@@ -184,7 +180,7 @@ async function processEvent(contract: any, record: EventRecord, blockNumber: num
         logger.info(`Timestamp: ${timestamp}`);
         logger.info(`Event Data: ${JSON.stringify(formattedEvent, null, 2)}`);
 
-        await saveEventToDatabase(contract.address, blockNumber, decodedEvent.event.identifier, formattedEvent, txHash, timestamp);
+        eventsToSave.push({ contractAddress: contract.address, blockNumber, txHash, timestamp, eventName: decodedEvent.event.identifier, eventData: formattedEvent });
     } catch (error) {
         logger.error(`Error decoding event: ${error}`);
     }
@@ -200,7 +196,7 @@ function formatEvent(decodedEvent: DecodedEvent) {
     return formattedEvent;
 }
 
-function formatArg(arg: Codec | ArrayBuffer | { valueOf(): ArrayBuffer | SharedArrayBuffer; }, argName: string) {
+function formatArg(arg: Codec | ArrayBuffer | { valueOf(): ArrayBuffer | SharedArrayBuffer }, argName: string) {
     if (argName === 'execStatus' || argName === 'success' || argName === 'initiateWithdrawal' || argName === 'execFlag') {
         return arg.toString() === 'true';
     }
@@ -222,19 +218,16 @@ function formatArg(arg: Codec | ArrayBuffer | { valueOf(): ArrayBuffer | SharedA
     }
 }
 
-async function saveEventToDatabase(contractAddress: string, blockNumber: number, eventName: string, eventData: EventData, txHash: string, timestamp: number) {
-    logger.info('Saving event to database');
-
+async function saveEventsToDatabase(events: any[]): Promise<void> {
     const collection = await getCollection('contractEvents');
-    if (collection) {
-        const blockLog = { contractAddress, blockNumber, txHash, timestamp, eventName, eventData } as any;
-        await collection.insertOne(blockLog);
-    } else {
-        logger.error('Failed to retrieve contractEvents collection');
+    if (!collection) throw new Error('Failed to retrieve contractEvents');
+    if ( events.length > 0) {
+        await collection.insertMany(events);
     }
+   
 }
 
-async function determineStartBlock(chainStateCollection: Collection<Document> | Collection<Document> | undefined, startBlockFromConfig?: number) {
+async function determineStartBlock(chainStateCollection: Collection<Document> | undefined, startBlockFromConfig?: number) {
     logger.info('Determining start block');
     const lastSyncedBlock = await getLastSyncedBlock(chainStateCollection as any);
     console.log("lastSyncedBlock:", lastSyncedBlock);
@@ -247,6 +240,7 @@ export async function startStreamerService() {
         await initialize();
     } catch (error) {
         logger.error(`Failed to start listener service: ${error.message} -> Retrying after a delay...`);
+        await closeMongoDBConnection()
         setTimeout(startStreamerService, 10000);
     }
 }

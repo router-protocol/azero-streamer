@@ -1,36 +1,43 @@
-import { Collection, Db, MongoClient } from 'mongodb';
-import { MONGO_DB_URI } from '../../constant'; // Ensure this is the correct path for your constants
+import { MongoClient, Db, Collection, Document } from 'mongodb';
 import logger from '../../logger'; // Update the import path according to your project structure
 
-// Database Name for Azero data
 const dbName = 'azero-streamer-testnet';
+let mongoClient: MongoClient;
+export let DBInstance: Db | null = null;
 
-export let DBInstance: Db;
-
-// Function to initialize MongoDB connection
-async function initializeMongoDB(): Promise<Db | undefined> {
+export async function initializeMongoDB(): Promise<void> {
     try {
-        logger.info(`Connecting to MongoDB - ${MONGO_DB_URI}`);
-        const client = new MongoClient(MONGO_DB_URI);
-        await client.connect();
-        logger.info(`Connected to MongoDB Server`);
-        DBInstance = client.db(dbName);
-        return DBInstance;
+        if (!mongoClient) {
+            logger.info(`Connecting to MongoDB - ${process.env.MONGO_DB_URI}`);
+            const options = {
+                maxPoolSize: 10
+            };
+            mongoClient = new MongoClient(process.env.MONGO_DB_URI as string, options);
+            await mongoClient.connect();
+            logger.info(`Connected to MongoDB Server`);
+            DBInstance = mongoClient.db(dbName);
+        }
     } catch (error) {
         logger.error(`Error occurred during MongoDB initialization - ${error}`);
+        throw error;
     }
 }
 
-// Function to get a specific collection from the MongoDB
-async function getCollection(collectionName: string): Promise<Collection<Document> | undefined> {
-    try {
-        if (!DBInstance) {
-            throw new Error('DBInstance is not initialized. Call initializeMongoDB first.');
-        }
-        return DBInstance.collection(collectionName);
-    } catch (error) {
-        logger.error(`Error occurred getting collection ${collectionName} - ${error}`);
+export async function closeMongoDBConnection(): Promise<void> {
+    if (mongoClient) {
+        await mongoClient.close();
+        logger.info(`MongoDB connection closed`);
+        mongoClient = null;
+        DBInstance = null;
     }
 }
+export function getDb(): Db {
+    if (!DBInstance) {
+        throw new Error('MongoClient is not initialized. Call initializeMongoDB first.');
+    }
+    return DBInstance;
+}
 
-export { initializeMongoDB, getCollection };
+export function getCollection(collectionName: string): Collection {
+    return getDb().collection(collectionName);
+}
