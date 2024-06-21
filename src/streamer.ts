@@ -77,10 +77,10 @@ export async function initialize() {
         const latestBlockNumber = latestBlock.block.header.number.toNumber();
 
         if (currentBlock >= latestBlockNumber) {
-            logger.info(`Current block number ${currentBlock} is >= latest block number ${latestBlockNumber}. Restarting streamer service...`);
-            await closeMongoDBConnection()
-            setTimeout(startStreamerService, 10000);  
-            return;
+            logger.info(`Current block number ${currentBlock} is >= latest block number ${latestBlockNumber}. Pausing for 10 seconds`);
+            await new Promise(resolve => setTimeout(resolve, 10000)); 
+            logger.info(`Resuming block processing from block ${currentBlock} after pause`);
+            continue; 
         }
 
         logger.info(`Starting streaming service from block ${currentBlock}`);
