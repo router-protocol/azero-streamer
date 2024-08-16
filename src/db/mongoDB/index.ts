@@ -1,7 +1,7 @@
 import { MongoClient, Db, Collection, Document } from 'mongodb';
 import logger from '../../logger'; // Update the import path according to your project structure
 
-const dbName = 'azero-streamer-testnet';
+const dbName = 'azero-streamer';
 let mongoClient: MongoClient;
 export let DBInstance: Db | null = null;
 
