@@ -1,7 +1,7 @@
 version: '3.3'
 services:
   streamer:
-    image: rahulbane/azero-streamer:v2.0
+    image: azero-streamer
     env_file:
       - .env
     ports:
