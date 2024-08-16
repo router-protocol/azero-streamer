@@ -95,8 +95,8 @@ async function fetchMintBurnBridge(url: string): Promise<string | undefined> {
     try {
         const response = await axios.get(url, { headers: { 'Content-Type': 'application/json' } });
         const data = response.data;
-        const alephTestnetData = data['aleph-testnet'];
-        const mintBurnBridge = alephTestnetData ? alephTestnetData.mintBurnBridge : undefined;
+        const alephZeroData = data['aleph-zero'];
+        const mintBurnBridge = alephZeroData ? alephZeroData.mintBurnBridge : undefined;
         return mintBurnBridge;
     } catch (error) {
         logger.error('Error fetching data:', error);
