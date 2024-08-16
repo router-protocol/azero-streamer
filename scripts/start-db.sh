@@ -5,7 +5,7 @@
 set -e
 
 DB_IMAGE_NAME="mongo:6-jammy"
-DB_SERVICE_NAME="azero-streamer"
+DB_SERVICE_NAME="azero-streamer-1-db"
 DB_VOLUME_PATH="$(pwd)/db-alpha"
 ENV_PATH="$(pwd)/.env"
 
