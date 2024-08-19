@@ -27,11 +27,11 @@ Update the following environment variables from `.env.example` file:
 - ALERTER_ACTIVE=false
 - SLACK_WEBHOOK_URL=**https**://hooks.slack.com/services/FOR/YOUR/SLACK/WEBHOOK
 ```
-`MONGO_DB_URI` is the URI of the MongoDB instance. We are running MongoDB locally, you have to use port defined in mongodb. `EXPLORER_ENVIRONMENT` either will be mainnet, testnet or alpha-devnet. 
-`START_BLOCK` is block to be started from during intial start. 
-`PORT` to be exposed. 
-`ALERTER_ACTIVE` and `SLACK_WEBHOOK_URL` is for slack health alerter.
-`START_BLOCK` is the overide block to be started from. If this is set, all other condition will be ignored.
+`MONGO_DB_URI` is the URI of the MongoDB instance. We are running MongoDB locally, you have to use port defined in mongodb. `EXPLORER_ENVIRONMENT` either will be mainnet, testnet or alpha-devnet.   
+`START_BLOCK` is block to be started from during intial start.   
+`PORT` to be exposed.   
+`ALERTER_ACTIVE` and `SLACK_WEBHOOK_URL` is for slack health alerter.  
+`START_BLOCK` is the overide block to be started from. If this is set, all other condition will be ignored.  
 
 # Running the Azero Streamer
 
@@ -44,5 +44,5 @@ Update the following environment variables from `.env.example` file:
 3. **Health Check for service**
 `curl http://localhost:6903/health`
 
-# When restarting streamer, if .env file has START_BLOCK provided, streamer will start from the given START_BLOCK again.
-# If you wish to run from the lastSyncedBlock from the db, remove the START_BLOCK from .env and Run Docker Swarm Script
+#### When restarting streamer, if .env file has START_BLOCK provided, streamer will start from the given START_BLOCK again.
+#### If you wish to run from the lastSyncedBlock from the db, remove the START_BLOCK from .env and Run Docker Swarm Script
