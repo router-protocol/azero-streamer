@@ -22,7 +22,7 @@ export const AlephZeroTestnet: Chain = {
 };
 
 export const AlephZeroMainnet: Chain = {
-  id: "aleph-mainnet",
+  id: "aleph-zero",
   name: "Aleph Zero Mainnet",
   type: "sr25519", // or ed25519 :  *25519
   nodeWSUrl: process.env.AZERO_NODE_WS_URL,
@@ -32,11 +32,11 @@ export const AlephZeroMainnet: Chain = {
 
 const idmp = {
   "aleph-testnet": AlephZeroTestnet,
-  "aleph-mainnet": AlephZeroMainnet
+  "aleph-zero": AlephZeroMainnet
 };
 
 export const getNetwork = (id: string) => idmp[id];
 
 export const MONGO_DB_URI = process.env.MONGO_DB_URI ?? "mongodb://127.0.0.1:27017/";
 export const SLACK_WEBHOOK_URL = process.env.SLACK_WEBHOOK_URL; // For alerting, if applicable
-export const ALERTER_ACTIVE = process.env.ALERTER_ACTIVE === "true" ?? false; // Feature flag for enabling/disabling alerts
+export const ALERTER_ACTIVE = process.env.ALERTER_ACTIVE === "true"; // Feature flag for enabling/disabling alerts

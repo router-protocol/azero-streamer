@@ -2,8 +2,9 @@ import { Collection } from 'mongodb';
 
 export async function updateLastUpdatedBlock(collection: Collection, block: number): Promise<void> {
     try {
+	console.log("Updating Block in Db to : ",block)
         const result = await collection.findOne({ id: "CHAIN_STATE" });
-
+	
         if (!result) {
             await collection.insertOne({
                 id: "CHAIN_STATE",

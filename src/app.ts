@@ -3,7 +3,7 @@ import cors from 'cors';
 import path from 'path';
 import logger from './logger';
 import { startStreamerService } from './streamer';
-import { DBInstance, initializeMongoDB } from './db/mongoDB';
+import { initializeMongoDB, DBInstance } from './db/mongoDB';  // Ensure DBInstance is exported
 import { healthCheck } from './routes/healthCheck';
 import { fetchLogs } from './routes/getLogs';
 import { healthCheckService } from './utils/healthCheckService';
@@ -33,17 +33,18 @@ async function main() {
 }
 
 main();
-let continousAlerts = 1;
+
+let continuousAlerts = 1;
 if (ALERTER_ACTIVE) {
     setInterval(async () => {
         // do health check every 5 minutes
         if (!DBInstance) {
             const alerted = await healthCheckService();
             if (alerted) {
-                continousAlerts++;
+                continuousAlerts++;
             } else {
-                continousAlerts = 1;
+                continuousAlerts = 1;
             }
         }
-    }, continousAlerts * 5 * 60 * 1000);
+    }, continuousAlerts * 5 * 60 * 1000);
 }

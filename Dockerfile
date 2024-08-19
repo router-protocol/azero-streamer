@@ -1,15 +1,16 @@
+ARG RUNNER_IMAGE="gcr.io/distroless/base-debian11"
 # Build Stage
-FROM node:20 AS builder
+FROM node:18.17 AS builder
 WORKDIR /app
-COPY package*.json ./
-RUN npm install
+COPY package.json ./
+COPY yarn.lock ./
 COPY . .
-RUN npm run build
+RUN yarn install
+RUN yarn build
 
-# Final Stage
-FROM node:20-alpine
+FROM --platform=linux/x86_64 gcr.io/distroless/nodejs20-debian11
 WORKDIR /app
 COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/node_modules ./node_modules
-EXPOSE 6900
-CMD ["node", "dist/app.js"]
+EXPOSE 6903
+CMD ["dist/app.js"]
