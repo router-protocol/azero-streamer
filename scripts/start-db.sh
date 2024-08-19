@@ -33,10 +33,10 @@ if validate_file_path "$ENV_PATH"; then
     echo "ENV file found"
 fi
 
-#if service_exists $DB_SERVICE_NAME; then
-#    echo "Removing existing $DB_SERVICE_NAME service..."
-#    docker service rm $DB_SERVICE_NAME
-#fi
+if service_exists $DB_SERVICE_NAME; then
+   echo "Removing existing $DB_SERVICE_NAME service..."
+   docker service rm $DB_SERVICE_NAME
+fi
 
 echo "Creating $DB_SERVICE_NAME service"
 if docker service create \
