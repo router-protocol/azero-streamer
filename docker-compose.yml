@@ -5,7 +5,7 @@ services:
     env_file:
       - .env
     ports:
-      - '6901:6901'
+      - '6903:6903'
     depends_on:
       - mongodb
     environment:

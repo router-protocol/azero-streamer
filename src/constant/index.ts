@@ -32,7 +32,7 @@ export const AlephZeroMainnet: Chain = {
 
 const idmp = {
   "aleph-testnet": AlephZeroTestnet,
-  "aleph-mainnet": AlephZeroMainnet
+  "aleph-zero": AlephZeroMainnet
 };
 
 export const getNetwork = (id: string) => idmp[id];

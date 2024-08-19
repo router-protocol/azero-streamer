@@ -25,7 +25,8 @@ export async function initialize() {
     logger.info('Starting MongoDB initialization');
 
     await initializeMongoDB();
-
+	
+    logger.info(`CHAIN_ID: ${process.env.CHAIN_ID}`);
     const network = getNetwork(process.env.CHAIN_ID);
     logger.info(`Streamer Service Running on : ${network.name}`);
 
@@ -68,7 +69,8 @@ export async function initialize() {
 
     logger.info('Fetching chain state collection');
     const chainStateCollection = await getCollection('chainState');
-
+    console.log("chainStateCollection.dbName : ",chainStateCollection.dbName)
+	
     while (true) {
         let currentBlock = await determineStartBlock(chainStateCollection as any, network.startBlock ? network.startBlock : undefined);
         logger.info('Fetching latest block hash');
@@ -230,7 +232,8 @@ async function saveEventsToDatabase(events: any[]): Promise<void> {
 async function determineStartBlock(chainStateCollection: Collection<Document> | undefined, startBlockFromConfig?: number) {
     logger.info('Determining start block');
     const lastSyncedBlock = await getLastSyncedBlock(chainStateCollection as any);
-    console.log("lastSyncedBlock:", lastSyncedBlock);
+    console.log("lastSyncedBlock : ", lastSyncedBlock);
+    console.log("startBlockFromConfig : ", startBlockFromConfig);
     return startBlockFromConfig !== undefined ? startBlockFromConfig : lastSyncedBlock;
 }
 
