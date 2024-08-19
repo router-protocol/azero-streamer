@@ -27,8 +27,8 @@ Update the following environment variables from `.env.example` file:
 - ALERTER_ACTIVE=false
 - SLACK_WEBHOOK_URL=**https**://hooks.slack.com/services/FOR/YOUR/SLACK/WEBHOOK
 ```
-`MONGO_DB_URI` is the URI of the MongoDB instance. We are running MongoDB locally, you have to use port defined in mongodb. 
-`MNEMONIC` is used in streamer to create signer for utilizing instances of contracts. The wallet is not required to hold any funds.
+`MONGO_DB_URI` is the URI of the MongoDB instance. We are running MongoDB locally, you have to use port defined in mongodb.   
+`MNEMONIC` is used in streamer to create signer for utilizing instances of contracts. The wallet is not required to hold any funds.  
 `EXPLORER_ENVIRONMENT` either will be mainnet, testnet or alpha-devnet.   
 `START_BLOCK` is block to be started from during intial start.   
 `PORT` to be exposed.   
