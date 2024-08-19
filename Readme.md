@@ -15,9 +15,14 @@ Ensure that you have Docker, Node.js, and Yarn installed on your machine. If not
 2. **Create `.env` file**
 Update the following environment variables from `.env.example` file:
 ```yaml
+
+- CONFIG_SERVICE_URL=https://pathfinder-internal.routerchain.dev/api/contracts
 - MONGO_DB_URI=mongodb://mongodb:27018/
-- NETWORK=testnet
-- START_BLOCK=SOME_BLOCK_NUMBER # omit this if you want to start from the 0th block
+- MNEMONIC=
+- CHAIN_ID=aleph-zero
+- AZERO_NODE_WS_URL=wss://ws.azero.dev
+- EXPLORER_ENVIRONMENT=mainnet
+- START_BLOCK=SOME_BLOCK_NUMBER # omit this if you want to start from the 0th block or lastSyncedBlock in your db
 - PORT=6901
 - ALERTER_ACTIVE=true
 - SLACK_WEBHOOK_URL=**https**://hooks.slack.com/services/FOR/YOUR/SLACK/WEBHOOK
@@ -35,3 +40,6 @@ Update the following environment variables from `.env.example` file:
 
 3. **Health Check for service**
 `curl http://localhost:6903/health`
+
+# When restarting streamer, if .env file has START_BLOCK provided, streamer will start from the given START_BLOCK again.
+# If you wish to run from the lastSyncedBlock from the db, remove the START_BLOCK from .env and Run Docker Swarm Script
