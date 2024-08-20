@@ -51,7 +51,7 @@ docker service create \
     --limit-cpu 2 \
     --restart-max-attempts 1 \
     --env-file "$ENV_PATH" \
-    -p 8903:6903 \
+    -p 8903:8903 \
     --host "host.docker.internal:host-gateway" \
     $IMAGE_NAME
 
