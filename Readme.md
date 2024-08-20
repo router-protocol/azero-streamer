@@ -17,13 +17,13 @@ Update the following environment variables from `.env.example` file:
 ```yaml
 
 CONFIG_SERVICE_URL=https://pathfinder-internal.routerchain.dev/api/contracts
-MONGO_DB_URI=mongodb://mongodb:27018/
+MONGO_DB_URI=mongodb://mongodb:27016/
 MNEMONIC=pledge motion dawn decorate seed absurd warm link hip warrior garment element
 CHAIN_ID=aleph-zero
 AZERO_NODE_WS_URL=wss://ws.azero.dev
 EXPLORER_ENVIRONMENT=mainnet
 START_BLOCK=84376200 # omit this if you want to start from the 0th block or lastSyncedBlock in your db
-PORT=6901 
+PORT=8903
 ALERTER_ACTIVE=false
 SLACK_WEBHOOK_URL=**https**://hooks.slack.com/services/FOR/YOUR/SLACK/WEBHOOK
 ```
