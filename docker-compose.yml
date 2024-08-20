@@ -5,15 +5,15 @@ services:
     env_file:
       - .env
     ports:
-      - '6903:6903'
+      - '8903:8903'
     depends_on:
       - mongodb
     environment:
       - MONGO_DB_URI=${MONGO_DB_URI}
   mongodb:
     image: mongo:6-jammy
-    command: mongod --port 27018
+    command: mongod --port 27016
     ports:
-      - '27018:27018'
+      - '27016:27016'
     volumes:
       - ./db-alpha:/data/db:rw
