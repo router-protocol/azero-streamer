@@ -27,7 +27,6 @@ fetchLogs.get('/fetch-logs', async (req: Request, res: Response) => {
     const endBlock = isNaN(reqEndBlock) ? startBlock + limit : reqEndBlock;
 
     try {
-        logger.info(`Fetching logs from block ${startBlock} to ${endBlock} for contract ${reqContract}`);
         const contractEventsCollection = await getCollection('contractEvents');
         if (!contractEventsCollection) {
             logger.error('Collection contractEvents not found');

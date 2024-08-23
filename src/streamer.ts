@@ -69,7 +69,6 @@ export async function initialize() {
 
     logger.info('Fetching chain state collection');
     const chainStateCollection = await getCollection('chainState');
-    console.log("chainStateCollection.dbName : ",chainStateCollection.dbName)
 	
     while (true) {
         let currentBlock = await determineStartBlock(chainStateCollection as any, network.startBlock ? network.startBlock : undefined);

@@ -8,7 +8,6 @@ const healthCheck = Router();
 healthCheck.get('/health', async (req: Request, res: Response) => {
     try {
         const chainStateCollection = await getCollection('chainState');
-	console.log("chainStateCollection.dbName : ",chainStateCollection.dbName)
         if (!chainStateCollection) {
             logger.error('Failed to retrieve chainState collection');
             res.status(500).json({ success: false, message: 'Failed to retrieve chainState collection' });
