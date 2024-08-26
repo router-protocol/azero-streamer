@@ -1,4 +1,5 @@
 ARG RUNNER_IMAGE="gcr.io/distroless/base-debian11"
+
 # Build Stage
 FROM node:18.17 AS builder
 WORKDIR /app
@@ -13,4 +14,4 @@ WORKDIR /app
 COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/node_modules ./node_modules
 EXPOSE 8903
-CMD ["dist/app.js"]
+CMD ["--max-old-space-size=4096", "dist/app.js"]
