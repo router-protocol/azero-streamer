@@ -108,6 +108,11 @@ async function fetchMintBurnBridge(url: string): Promise<string | undefined> {
 async function processBlocksInChunks(api: ApiPromise, chainStateCollection: Collection<Document>, gateway: Gateway, assetForwarder: AssetForwarder, assetBridge: AssetBridge, startBlock: number, endBlock: number, defaultChunkSize: number) {
     const totalBlocks = endBlock - startBlock + 1;
     const optimalChunkSize = Math.min(totalBlocks, defaultChunkSize);
+    logger.info(`Total blocks to process: ${totalBlocks}`);
+    logger.info(`Optimal chunk size: ${optimalChunkSize}`);
+    logger.info(`Start block: ${startBlock}`);
+    logger.info(`End block: ${endBlock}`);
+    logger.info(`Default chunk size: ${defaultChunkSize}`);
 
     logger.info(`Processing blocks from ${startBlock} to ${endBlock} in chunks of ${optimalChunkSize}`);
     

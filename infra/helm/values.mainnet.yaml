@@ -42,10 +42,10 @@ ingress:
 backendConfig:
   healthCheck:
     requestPath: /
-    checkIntervalSec: 30
-    timeoutSec: 10
+    checkIntervalSec: 60
+    timeoutSec: 100
     healthyThreshold: 1
-    unhealthyThreshold: 2
+    unhealthyThreshold: 5
 
 resources:
   requests:
