@@ -2,6 +2,7 @@ replicaCount: 1
 
 app: azero-streamer
 env: mainnet
+gitRepo: https://github.com/router-protocol/azero-streamer
 
 image:
   repository: asia-south1-docker.pkg.dev/router-mainnet-api/router-apps-asia-south/azero-streamer
@@ -28,7 +29,7 @@ sslcert:
 
 autoscaling:
   enabled: true
-  targetCPUUtilizationPercentage: 80
+  targetCPUUtilizationPercentage: 85
   minReplicas: 1
   maxReplicas: 1
 
@@ -49,8 +50,8 @@ backendConfig:
 
 resources:
   requests:
-    memory: "1024Mi"
-    cpu: "700m"
+    memory: "1Gi"
+    cpu: "200m"
   limits:
-    memory: "2048Mi"
-    cpu: "950m"
+    memory: "3Gi"
+    cpu: "1000m"
